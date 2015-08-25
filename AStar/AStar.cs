@@ -11,7 +11,7 @@ namespace AStar
         private static Dictionary<T, double> GValues { get; set; }
 
         //We keep Closed and Open public for visualization demos
-        public static List<T> Closed { get; private set; }
+        public static HashSet<T> Closed { get; private set; }
         public static PriorityQueue<T, double> OpenP { get; private set; }
 
         public static double HeuristicScale { private get; set; }
@@ -32,7 +32,7 @@ namespace AStar
         public static Stack<T> PathFind(T start, T end, Func<T, List<T>> GetNeighbors,
             Func<T, T, double> DistanceFunc)
         {
-            Closed = new List<T>();
+            Closed = new HashSet<T>();
             OpenP = new PriorityQueue<T, double>();
             OpenP.Enqueue(start, 0);
 
@@ -41,6 +41,7 @@ namespace AStar
 
             while (OpenP.Any())
             {
+                //Take the most promising node
                 var currentNode = OpenP.Dequeue();
 
                 if (currentNode == null || Equals(currentNode, end))
