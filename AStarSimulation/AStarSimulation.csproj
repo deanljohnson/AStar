@@ -32,6 +32,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="PriorityQueue">
+      <HintPath>..\..\..\Visual Studio 2013\extlibs\PriorityQueue\PriorityQueue.dll</HintPath>
+    </Reference>
     <Reference Include="sfmlnet-audio-2">
       <HintPath>..\..\..\extlibs\SFML\References\sfmlnet-audio-2.dll</HintPath>
     </Reference>

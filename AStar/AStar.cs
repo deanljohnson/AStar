@@ -1,18 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using PriorityQueue;
 
 namespace AStar
 {
     public static class AStar<T>
     {
         private static Dictionary<T, T> Parents { get; set; }
-        private static Dictionary<T, double> FValues { get; set; }
         private static Dictionary<T, double> GValues { get; set; }
 
         //We keep Closed and Open public for visualization demos
         public static List<T> Closed { get; private set; }
-        public static List<T> Open { get; private set; }
+        public static PriorityQueue<T, double> OpenP { get; private set; }
 
         public static double HeuristicScale { private get; set; }
 
@@ -33,14 +33,15 @@ namespace AStar
             Func<T, T, double> DistanceFunc)
         {
             Closed = new List<T>();
-            Open = new List<T> { start };
-            FValues = new Dictionary<T, double> { { start, 0.0 }, { end, 0.0 } };
+            OpenP = new PriorityQueue<T, double>();
+            OpenP.Enqueue(start, 0);
+
             GValues = new Dictionary<T, double> { { start, 0.0 }, { end, 0.0 } };
             Parents = new Dictionary<T, T>();
 
-            while(Open.Any())
+            while (OpenP.Any())
             {
-                var currentNode = (T) LowestFScore(Open);
+                var currentNode = OpenP.Dequeue();
 
                 if (currentNode == null || Equals(currentNode, end))
                 {
@@ -48,7 +49,6 @@ namespace AStar
                 }
 
                 Closed.Add(currentNode);
-                Open.Remove(currentNode);
 
                 var neighbors = CallGetNeighbors(currentNode, GetNeighbors);
                 foreach (var i in neighbors)
@@ -56,18 +56,22 @@ namespace AStar
                     if (Closed.Contains(i))
                         continue;
 
+                    var openHasI = OpenP.Contains(i);
                     var currentG = GValues[currentNode] + DistanceFunc(currentNode, i);
-                    var openHasI = Open.Contains(i);
 
                     if (!openHasI || currentG < GValues[i])
                     {
                         SetParent(i, currentNode);
                         GValues[i] = currentG;
-                        FValues[i] = currentG + (DistanceFunc(i, end) * HeuristicScale);
+                        var currentF = currentG + (DistanceFunc(i, end) * HeuristicScale);
 
                         if (!openHasI)
                         {
-                            Open.Add(i);
+                            OpenP.Enqueue(i, currentF);
+                        }
+                        else
+                        {
+                            OpenP.SetPriority(i, currentF);
                         }
                     }
                 }
@@ -75,9 +79,9 @@ namespace AStar
 
             return null;
         }
-
+        /*
         /// <summary>
-        /// Returns an efficient path from start to and end point with a minimal path length
+        /// Returns an efficient path from start to an end point with a minimal path length
         /// </summary>
         /// <param name="start">The start point</param>
         /// <param name="endPoints">A list of acceptable end points</param>
@@ -137,7 +141,7 @@ namespace AStar
             }
 
             return null;
-        }
+        }*/
 
         /// <summary>
         /// Sets the parent of the given node. If the node already has a parent assigned, the previous parent is overwritten
@@ -168,10 +172,6 @@ namespace AStar
 
             foreach (var n in neighbors)
             {
-                if (!FValues.ContainsKey(n))
-                {
-                    FValues.Add(n, 0.0);
-                }
                 if (!GValues.ContainsKey(n))
                 {
                     GValues.Add(n, 0.0);
@@ -180,7 +180,7 @@ namespace AStar
 
             return neighbors;
         }
-
+        /*
         /// <summary>
         /// Finds the closest node and returns that distance
         /// </summary>
@@ -191,16 +191,7 @@ namespace AStar
         private static double DistanceToClosest(T node, IEnumerable<T> endPoints, Func<T, T, double> DistanceFunc)
         {
             return endPoints.Select(endPoint => DistanceFunc(node, endPoint)).Concat(new[] {double.MaxValue}).Min();
-        }
-
-        private static object LowestFScore(List<T> nodes)
-        {
-            if (nodes.Count == 0)
-                return null;
-
-            nodes.Sort((x, y) => Comparer<double>.Default.Compare(FValues[x], FValues[y]));
-            return nodes[0];
-        }
+        }*/
 
         /// <summary>
         /// Builds the found path from start to end
@@ -211,6 +202,7 @@ namespace AStar
         private static Stack<T> ConstructBestPath(T start, T end)
         {
             var bestPath = new Stack<T>();
+            bestPath.Push(end);
 
             var currentNode = Parents[end];
             bestPath.Push(currentNode);

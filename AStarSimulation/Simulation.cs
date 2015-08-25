@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using SFML.Graphics;
 using SFML.Window;
 
@@ -7,12 +8,16 @@ namespace AStarSimulation
 {
     internal class Simulation
     {
+        private readonly Stopwatch m_stopwatch = new Stopwatch();
+        private long m_pathFindingTime;
+        private int m_nodesVisited;
+        private int m_pathLength;
+
         private static readonly Random Random = new Random();
         private readonly RenderWindow m_window;
         private List<Node> m_nodes = new List<Node>();
         private Node m_start;
         private Node m_end;
-        private Node m_end2;
         private bool m_runPathFinding;
         private bool m_simComplete;
         private int m_width;
@@ -27,26 +32,35 @@ namespace AStarSimulation
             m_window.MouseMoved += MouseMovedEvent;
 
             CreateNodes();
-            AStar.AStar<Node>.HeuristicScale = 1;
+            AStar.AStar<Node>.HeuristicScale = 4;
         }
 
         public void Update()
         {
+            Console.Clear();
             if (m_runPathFinding)
             {
-                var path = AStar.AStar<Node>.PathFind(m_start, new List<Node>{m_end,m_end2}, GetNeighbors, DistanceBetweenNodes);
+                m_stopwatch.Start();
 
+                var path = AStar.AStar<Node>.PathFind(m_start, m_end, GetNeighbors, DistanceBetweenNodes);
+
+                m_stopwatch.Stop();
+                m_pathFindingTime = m_stopwatch.ElapsedMilliseconds;
+                m_stopwatch.Reset();
+                
                 if (path != null)
                 {
                     m_runPathFinding = false;
                     m_simComplete = true;
+                    m_pathLength = path.Count;
+                    m_nodesVisited = AStar.AStar<Node>.OpenP.Count() + AStar.AStar<Node>.Closed.Count;
 
                     foreach (var node in path)
                     {
                         node.IsOptimal = true;
                     }
 
-                    foreach (var node in AStar.AStar<Node>.Open)
+                    foreach (var node in AStar.AStar<Node>.OpenP)
                     {
                         node.IsOpen = true;
                     }
@@ -57,6 +71,10 @@ namespace AStarSimulation
                     }
                 }
             }
+
+            Console.WriteLine("Time Taken: " + m_pathFindingTime);
+            Console.WriteLine("Path Length: " + m_pathLength);
+            Console.WriteLine("Nodes Visited: " + m_nodesVisited);
         }
 
         public void Render()
@@ -92,8 +110,8 @@ namespace AStarSimulation
             m_start.IsStart = true;
             m_end = m_nodes[Random.Next(m_nodes.Count)];
             m_end.IsEnd = true;
-            m_end2 = m_nodes[Random.Next(m_nodes.Count)];
-            m_end2.IsEnd = true;
+            /*m_end2 = m_nodes[Random.Next(m_nodes.Count)];
+            m_end2.IsEnd = true;*/
         }
 
         private static double DistanceBetweenNodes(Node a, Node b)
