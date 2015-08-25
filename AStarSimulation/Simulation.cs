@@ -12,6 +12,8 @@ namespace AStarSimulation
         private long m_pathFindingTime;
         private int m_nodesVisited;
         private int m_pathLength;
+        private long m_totalPathFindingTime;
+        private long m_pathsComputed;
 
         private static readonly Random Random = new Random();
         private readonly RenderWindow m_window;
@@ -32,12 +34,11 @@ namespace AStarSimulation
             m_window.MouseMoved += MouseMovedEvent;
 
             CreateNodes();
-            AStar.AStar<Node>.HeuristicScale = 4;
+            AStar.AStar<Node>.HeuristicScale = 1;
         }
 
         public void Update()
         {
-            Console.Clear();
             if (m_runPathFinding)
             {
                 m_stopwatch.Start();
@@ -46,6 +47,8 @@ namespace AStarSimulation
 
                 m_stopwatch.Stop();
                 m_pathFindingTime = m_stopwatch.ElapsedMilliseconds;
+                m_totalPathFindingTime += m_pathFindingTime;
+                m_pathsComputed++;
                 m_stopwatch.Reset();
                 
                 if (path != null)
@@ -72,9 +75,18 @@ namespace AStarSimulation
                 }
             }
 
+            m_runPathFinding = true;
+            CreateNodes();
+
+            Console.Clear();
             Console.WriteLine("Time Taken: " + m_pathFindingTime);
             Console.WriteLine("Path Length: " + m_pathLength);
             Console.WriteLine("Nodes Visited: " + m_nodesVisited);
+            if (m_pathsComputed != 0)
+            {
+                Console.WriteLine("AverageTime: " + m_totalPathFindingTime / m_pathsComputed);
+            }
+            
         }
 
         public void Render()
