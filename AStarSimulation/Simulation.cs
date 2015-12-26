@@ -21,7 +21,6 @@ namespace AStarSimulation
         private static readonly Random Random = new Random();
         private readonly RenderWindow m_Window;
         private readonly Grid m_Grid;
-        private readonly GridDecorator m_GridDecorator;
         private Vector2i m_Start;
         private Vector2i m_End;
         private bool m_RunContinuously;
@@ -30,9 +29,8 @@ namespace AStarSimulation
         public Simulation(RenderWindow window)
         {
             var nodeSize = new Vector2i(10, 10);
-            m_Grid = new Grid(nodeSize, new Vector2i((int) (window.Size.X / nodeSize.X), (int) (window.Size.Y / nodeSize.Y)));
 
-            m_GridDecorator = new GridDecorator(m_Grid, new Dictionary<CellState, Color>
+            m_Grid = new Grid(nodeSize, new Vector2i((int)(window.Size.X / nodeSize.X), (int)(window.Size.Y / nodeSize.Y)), new Dictionary<CellState, Color>
             {
                 {CellState.Open, Color.Yellow},
                 {CellState.Closed, Color.Blue},
@@ -90,9 +88,9 @@ namespace AStarSimulation
             var nodesVisited = AStar<Vector2i>.Open.Count() + AStar<Vector2i>.Closed.Count;
             m_TotalNodesVisited += nodesVisited;
 
-            m_GridDecorator.Set(AStar<Vector2i>.Open, CellState.Open);
-            m_GridDecorator.Set(AStar<Vector2i>.Closed, CellState.Closed);
-            m_GridDecorator.Set(path, CellState.Path);
+            m_Grid.Set(AStar<Vector2i>.Open, CellState.Open);
+            m_Grid.Set(AStar<Vector2i>.Closed, CellState.Closed);
+            m_Grid.Set(path, CellState.Path);
 
             Console.Clear();
             Console.WriteLine("Heuristic: " + AStar<Vector2i>.HeuristicScale);
@@ -115,17 +113,17 @@ namespace AStarSimulation
 
         private void ResetNodes()
         {
-            m_Grid.ClearCellColors(Color.Transparent);
+            m_Grid.SetAll(Color.Transparent);
         }
 
         private void SetStartAndEnd()
         {
             //m_Start = new Vector2i(0, 0);
             m_Start = new Vector2i(Random.Next(m_Grid.GridSize.X), Random.Next(m_Grid.GridSize.Y));
-            m_GridDecorator.Set(m_Start, CellState.Start);
+            m_Grid.Set(m_Start, CellState.Start);
             //m_End = new Vector2i(m_Grid.GridSize.X - 1, m_Grid.GridSize.Y - 1);
             m_End = new Vector2i(Random.Next(m_Grid.GridSize.X), Random.Next(m_Grid.GridSize.Y));
-            m_GridDecorator.Set(m_End, CellState.End);
+            m_Grid.Set(m_End, CellState.End);
         }
 
         private void BuildObstacles()
@@ -139,7 +137,7 @@ namespace AStarSimulation
                         var i = new Vector2i(x, y);
                         if (i != m_Start && i != m_End)
                         {
-                            m_GridDecorator.Set(i, CellState.Wall);
+                            m_Grid.Set(i, CellState.Wall);
                         }
                     }
                 }
@@ -185,7 +183,7 @@ namespace AStarSimulation
 
             for (var i = 0; i < neighbors.Count; i++)
             {
-                if (m_GridDecorator.Is(neighbors[i], CellState.Wall))
+                if (m_Grid.Is(neighbors[i], CellState.Wall))
                 {
                     neighbors.RemoveAt(i);
                     i--;
@@ -233,7 +231,7 @@ namespace AStarSimulation
             {
                 var nodeClicked = IndexOfPixel(new Vector2i(e.X, e.Y));
 
-                m_GridDecorator.Set(nodeClicked, CellState.Wall);
+                m_Grid.Set(nodeClicked, CellState.Wall);
             }
         }
 
@@ -243,11 +241,11 @@ namespace AStarSimulation
             {
                 var nodeClicked = IndexOfPixel(new Vector2i(e.X, e.Y));
 
-                m_GridDecorator.Set(nodeClicked, CellState.Wall);
+                m_Grid.Set(nodeClicked, CellState.Wall);
                 var neighbors = GetNeighbors(nodeClicked);
                 foreach (var i in neighbors)
                 {
-                    m_GridDecorator.Set(i, CellState.Wall);
+                    m_Grid.Set(i, CellState.Wall);
                 }
             }
         }
