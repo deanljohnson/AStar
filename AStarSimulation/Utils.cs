@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using SFML.Window;
+using SFML.System;
 
 namespace AStarSimulation
 {
@@ -86,9 +86,19 @@ namespace AStarSimulation
             return new Vector2f(v.X * scaleFactor, v.Y * scaleFactor);
         }
 
+        public static double SquaredDistance(Vector2f v, Vector2f u)
+        {
+            return SquaredLength(v - u);
+        }
+
         public static double Distance(Vector2f v, Vector2f u)
         {
             return Length(v - u);
+        }
+
+        public static double SquaredLength(Vector2f v)
+        {
+            return (v.X * v.X + v.Y * v.Y);
         }
 
         public static double Length(Vector2f v)
@@ -131,7 +141,7 @@ namespace AStarSimulation
 
         public static bool RandomBool()
         {
-            var rand = 0;
+            int rand;
 
             lock (Random)
             {
