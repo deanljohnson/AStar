@@ -53,6 +53,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CellState.cs" />
+    <Compile Include="IIndexedPathfindingMap.cs" />
     <Compile Include="SquareGridBase.cs" />
     <Compile Include="Grid.cs" />
     <Compile Include="Program.cs" />

@@ -3,7 +3,7 @@ using SFML.System;
 
 namespace AStarSimulation
 {
-    internal class SquareGridBase : Transformable, Drawable
+    internal abstract class SquareGridBase : Transformable, Drawable
     {
         private readonly VertexArray m_QuadArray;
         private readonly VertexArray m_LineArray;
@@ -11,7 +11,7 @@ namespace AStarSimulation
         public Vector2i GridSize { get; }
         public Vector2i CellSize { get; }
 
-        public SquareGridBase(Vector2i cellSize, Vector2i gridSize)
+        protected SquareGridBase(Vector2i cellSize, Vector2i gridSize)
         {
             GridSize = gridSize;
             CellSize = cellSize;

@@ -17,10 +17,11 @@ namespace AStarSimulation
 
         private const Keyboard.Key START_CONTINUOUS_KEY = Keyboard.Key.Space;
         private const Keyboard.Key RUN_ONCE_KEY = Keyboard.Key.Return;
+        private const double WALL_DENSITY = .95;
 
         private static readonly Random Random = new Random();
         private readonly RenderWindow m_Window;
-        private readonly Grid m_Grid;
+        private readonly IIndexedPathfindingMap m_Grid;
         private Vector2i m_Start;
         private Vector2i m_End;
         private bool m_RunContinuously;
@@ -28,10 +29,11 @@ namespace AStarSimulation
 
         public Simulation(RenderWindow window)
         {
-            var nodeSize = new Vector2i(10, 10);
+            var nodeSize = new Vector2i(5, 5);
 
             m_Grid = new Grid(nodeSize, new Vector2i((int)(window.Size.X / nodeSize.X), (int)(window.Size.Y / nodeSize.Y)), new Dictionary<CellState, Color>
             {
+                {CellState.None, Color.Black},
                 {CellState.Open, Color.Yellow},
                 {CellState.Closed, Color.Blue},
                 {CellState.End, Color.Red},
@@ -45,7 +47,7 @@ namespace AStarSimulation
             m_Window.MouseButtonPressed += MousePressedEvent;
             m_Window.MouseMoved += MouseMovedEvent;
 
-            AStar<Vector2i>.HeuristicScale = 1;
+            AStar<Vector2i>.HeuristicScale = 1.3;
         }
 
         public void Update()
@@ -71,7 +73,7 @@ namespace AStarSimulation
         private void RunOnce()
         {
             m_Stopwatch.Start();
-            var path = AStar<Vector2i>.PathFind(m_Start, m_End, GetNeighbors, DistanceBetweenNodes);
+            var path = AStar<Vector2i>.PathFind(m_Start, m_End, m_Grid.NeighborsOfCell, m_Grid.DistanceEstimate);
             m_Stopwatch.Stop();
 
             if (path == null)
@@ -91,10 +93,12 @@ namespace AStarSimulation
             m_Grid.Set(AStar<Vector2i>.Open, CellState.Open);
             m_Grid.Set(AStar<Vector2i>.Closed, CellState.Closed);
             m_Grid.Set(path, CellState.Path);
+            m_Grid.Set(m_Start, CellState.Start);
+            m_Grid.Set(m_End, CellState.End);
 
             Console.Clear();
             Console.WriteLine("Heuristic: " + AStar<Vector2i>.HeuristicScale);
-            Console.WriteLine("Graph Size: {0}({1} * {2})", (m_Grid.GridSize.X * m_Grid.GridSize.Y), m_Grid.GridSize.X, m_Grid.GridSize.Y);
+            Console.WriteLine("Graph Size: {0}", m_Grid.Count);
             Console.WriteLine("Time Taken: " + pathFindingTime + "ms");
             Console.WriteLine("Path Length: " + pathLength);
             Console.WriteLine("Nodes Visited: " + nodesVisited);
@@ -113,26 +117,26 @@ namespace AStarSimulation
 
         private void ResetNodes()
         {
-            m_Grid.SetAll(Color.Transparent);
+            m_Grid.SetAll(CellState.None);
         }
 
         private void SetStartAndEnd()
         {
             //m_Start = new Vector2i(0, 0);
-            m_Start = new Vector2i(Random.Next(m_Grid.GridSize.X), Random.Next(m_Grid.GridSize.Y));
+            m_Start = m_Grid.RandomOpenCell();
             m_Grid.Set(m_Start, CellState.Start);
             //m_End = new Vector2i(m_Grid.GridSize.X - 1, m_Grid.GridSize.Y - 1);
-            m_End = new Vector2i(Random.Next(m_Grid.GridSize.X), Random.Next(m_Grid.GridSize.Y));
+            m_End = m_Grid.RandomOpenCell();
             m_Grid.Set(m_End, CellState.End);
         }
 
         private void BuildObstacles()
         {
-            for (var y = 0; y < m_Grid.GridSize.Y; y++)
+            for (var y = 0; y < m_Grid.Dimensions.Y; y++)
             {
-                for (var x = 0; x < m_Grid.GridSize.X; x++)
+                for (var x = 0; x < m_Grid.Dimensions.X; x++)
                 {
-                    if ((y % 2) != 0 && (Random.Next(0, 10) < 7))
+                    if ((y % 2) != 0 && (Random.NextDouble() < WALL_DENSITY))
                     {
                         var i = new Vector2i(x, y);
                         if (i != m_Start && i != m_End)
@@ -142,75 +146,6 @@ namespace AStarSimulation
                     }
                 }
             }
-        }
-
-        private static double DistanceBetweenNodes(Vector2i a, Vector2i b)
-        {
-            return Utils.Distance(new Vector2f(a.X, a.Y), new Vector2f(b.X, b.Y));
-        }
-
-        private List<Vector2i> GetNeighbors(Vector2i current)
-        {
-            var neighbors = new List<Vector2i>();
-
-            var onTop = OnTop(current);
-            var onBottom = OnBottom(current);
-            var onLeft = OnLeft(current);
-            var onRight = OnRight(current);
-
-            if (!onTop)
-            {
-                neighbors.Add(new Vector2i(current.X, current.Y - 1));
-
-                if (!onLeft)
-                    neighbors.Add(new Vector2i(current.X - 1, current.Y - 1));
-                if (!onRight)
-                    neighbors.Add(new Vector2i(current.X + 1, current.Y - 1));
-            }
-            if (!onBottom)
-            {
-                neighbors.Add(new Vector2i(current.X, current.Y + 1));
-
-                if (!onLeft)
-                    neighbors.Add(new Vector2i(current.X - 1, current.Y + 1));
-                if (!onRight)
-                    neighbors.Add(new Vector2i(current.X + 1, current.Y + 1));
-            }
-            if (!onLeft)
-                neighbors.Add(new Vector2i(current.X - 1, current.Y));
-            if (!onRight)
-                neighbors.Add(new Vector2i(current.X + 1, current.Y));
-
-            for (var i = 0; i < neighbors.Count; i++)
-            {
-                if (m_Grid.Is(neighbors[i], CellState.Wall))
-                {
-                    neighbors.RemoveAt(i);
-                    i--;
-                }
-            }
-
-            return neighbors;
-        }
-
-        private bool OnTop(Vector2i index)
-        {
-            return index.Y == 0;
-        }
-
-        private bool OnBottom(Vector2i index)
-        {
-            return index.Y == m_Grid.GridSize.Y - 1;
-        }
-
-        private bool OnLeft(Vector2i index)
-        {
-            return index.X == 0;
-        }
-
-        private bool OnRight(Vector2i index)
-        {
-            return index.X == m_Grid.GridSize.X;
         }
 
         private void KeyReleasedEvent(object sender, KeyEventArgs e)
@@ -229,7 +164,7 @@ namespace AStarSimulation
         {
             if (e.Button.Equals(Mouse.Button.Left))
             {
-                var nodeClicked = IndexOfPixel(new Vector2i(e.X, e.Y));
+                var nodeClicked = m_Grid.PixelToIndex(new Vector2i(e.X, e.Y));
 
                 m_Grid.Set(nodeClicked, CellState.Wall);
             }
@@ -239,21 +174,15 @@ namespace AStarSimulation
         {
             if (Mouse.IsButtonPressed(Mouse.Button.Left))
             {
-                var nodeClicked = IndexOfPixel(new Vector2i(e.X, e.Y));
+                var nodeClicked = m_Grid.PixelToIndex(new Vector2i(e.X, e.Y));
 
                 m_Grid.Set(nodeClicked, CellState.Wall);
-                var neighbors = GetNeighbors(nodeClicked);
+                var neighbors = m_Grid.NeighborsOfCell(nodeClicked);
                 foreach (var i in neighbors)
                 {
                     m_Grid.Set(i, CellState.Wall);
                 }
             }
-        }
-
-        private Vector2i IndexOfPixel(Vector2i pos)
-        {
-            var index = new Vector2i(pos.X / m_Grid.CellSize.X, pos.Y / m_Grid.CellSize.Y);
-            return index;
         }
     }
 }

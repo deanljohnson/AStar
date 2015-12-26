@@ -7,9 +7,6 @@ namespace AStar
 {
     public static class AStar<T> where T : IEquatable<T>
     {
-        public delegate double DistanceFunc(T a, T b);
-
-        public delegate List<T> GetNeighbors(T t);
 
         static AStar()
         {
@@ -32,8 +29,8 @@ namespace AStar
         /// <param name="getNeighbors">A function returning the neighbors of any node</param>
         /// <param name="distanceFunc">A function returning the approximate distance between two nodes</param>
         /// <returns></returns>
-        public static Stack<T> PathFind(T start, T end, GetNeighbors getNeighbors,
-            DistanceFunc distanceFunc)
+        public static Stack<T> PathFind(T start, T end, Func<T, IList<T>> getNeighbors,
+            Func<T, T, double> distanceFunc)
         {
             if (start.Equals(end))
             {
@@ -111,7 +108,7 @@ namespace AStar
         /// <param name="node"></param>
         /// <param name="getNeighbors"></param>
         /// <returns></returns>
-        private static IEnumerable<T> CallGetNeighbors(T node, GetNeighbors getNeighbors)
+        private static IEnumerable<T> CallGetNeighbors(T node, Func<T, IList<T>> getNeighbors)
         {
             var neighbors = getNeighbors(node);
 

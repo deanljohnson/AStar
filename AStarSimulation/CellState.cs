@@ -2,6 +2,7 @@
 {
     public enum CellState
     {
+        None,
         Open,
         Closed,
         Wall,
