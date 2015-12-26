@@ -48,14 +48,18 @@
     <Reference Include="sfmlnet-window-2">
       <HintPath>..\..\..\extlibs\SFML\References\sfmlnet-window-2.dll</HintPath>
     </Reference>
+    <Reference Include="SFNetHex">
+      <HintPath>libs\SFNetHex.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CellState.cs" />
+    <Compile Include="Grids\Hex\HexGrid.cs" />
     <Compile Include="IIndexedPathfindingMap.cs" />
-    <Compile Include="SquareGridBase.cs" />
-    <Compile Include="Grid.cs" />
+    <Compile Include="Grids\Square\SquareGridBase.cs" />
+    <Compile Include="Grids\Square\SquareGrid.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Simulation.cs" />
@@ -81,6 +85,9 @@
     <Content Include="libs\sfmlnet-graphics-2.dll" />
     <Content Include="libs\sfmlnet-system-2.dll" />
     <Content Include="libs\sfmlnet-window-2.dll" />
+    <Content Include="libs\SFNetHex.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

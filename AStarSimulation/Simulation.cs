@@ -5,6 +5,9 @@ using SFML.Graphics;
 using SFML.System;
 using SFML.Window;
 using AStar;
+using AStarSimulation.Grids.Hex;
+using AStarSimulation.Grids.Square;
+using SFNetHex;
 
 namespace AStarSimulation
 {
@@ -21,7 +24,7 @@ namespace AStarSimulation
 
         private static readonly Random Random = new Random();
         private readonly RenderWindow m_Window;
-        private readonly IIndexedPathfindingMap m_Grid;
+        private IIndexedPathfindingMap m_Grid;
         private Vector2i m_Start;
         private Vector2i m_End;
         private bool m_RunContinuously;
@@ -29,25 +32,15 @@ namespace AStarSimulation
 
         public Simulation(RenderWindow window)
         {
-            var nodeSize = new Vector2i(5, 5);
-
-            m_Grid = new Grid(nodeSize, new Vector2i((int)(window.Size.X / nodeSize.X), (int)(window.Size.Y / nodeSize.Y)), new Dictionary<CellState, Color>
-            {
-                {CellState.None, Color.Black},
-                {CellState.Open, Color.Yellow},
-                {CellState.Closed, Color.Blue},
-                {CellState.End, Color.Red},
-                {CellState.Start, Color.Green},
-                {CellState.Path, Color.Cyan},
-                {CellState.Wall, new Color(200, 200, 200)}
-            });
-
             m_Window = window;
             m_Window.KeyReleased += KeyReleasedEvent;
             m_Window.MouseButtonPressed += MousePressedEvent;
             m_Window.MouseMoved += MouseMovedEvent;
 
-            AStar<Vector2i>.HeuristicScale = 1.3;
+            //BuildSquareGrid(new Vector2i(5, 5));
+            BuildHexGrid(50, new Vector2f(5, 5));
+
+            AStar<Vector2i>.HeuristicScale = 1;
         }
 
         public void Update()
@@ -112,7 +105,7 @@ namespace AStarSimulation
         {
             ResetNodes();
             SetStartAndEnd();
-            BuildObstacles();
+            //BuildObstacles();
         }
 
         private void ResetNodes()
@@ -128,6 +121,35 @@ namespace AStarSimulation
             //m_End = new Vector2i(m_Grid.GridSize.X - 1, m_Grid.GridSize.Y - 1);
             m_End = m_Grid.RandomOpenCell();
             m_Grid.Set(m_End, CellState.End);
+        }
+
+        private void BuildSquareGrid(Vector2i nodeSize)
+        {
+            m_Grid = new SquareGrid(nodeSize, new Vector2i((int)(m_Window.Size.X / nodeSize.X), (int)(m_Window.Size.Y / nodeSize.Y)), new Dictionary<CellState, Color>
+            {
+                {CellState.None, Color.Black},
+                {CellState.Open, Color.Yellow},
+                {CellState.Closed, Color.Blue},
+                {CellState.End, Color.Red},
+                {CellState.Start, Color.Green},
+                {CellState.Path, Color.Cyan},
+                {CellState.Wall, new Color(200, 200, 200)}
+            });
+        }
+
+        private void BuildHexGrid(int radius, Vector2f hexSize)
+        {
+            m_Grid = new HexGrid(radius, Orientation.LayoutFlat, hexSize, new Dictionary<CellState, Color>
+            {
+                {CellState.None, Color.Black},
+                {CellState.Open, Color.Yellow},
+                {CellState.Closed, Color.Blue},
+                {CellState.End, Color.Red},
+                {CellState.Start, Color.Green},
+                {CellState.Path, Color.Cyan},
+                {CellState.Wall, new Color(200, 200, 200)}
+            })
+            { Position = new Vector2f(m_Window.Size.X / 2f, m_Window.Size.Y / 2f) };
         }
 
         private void BuildObstacles()

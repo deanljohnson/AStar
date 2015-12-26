@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using SFML.Graphics;
 using SFML.System;
 
-namespace AStarSimulation
+namespace AStarSimulation.Grids.Square
 {
-    internal class Grid : SquareGridBase, IIndexedPathfindingMap
+    internal class SquareGrid : SquareGridBase, IIndexedPathfindingMap
     {
         private static readonly Random Random = new Random();
 
@@ -14,7 +14,7 @@ namespace AStarSimulation
         public int Count => GridSize.X*GridSize.Y;
         public Vector2i Dimensions => GridSize;
 
-        public Grid(Vector2i cellSize, Vector2i gridSize, Dictionary<CellState, Color> stateToColorMap)
+        public SquareGrid(Vector2i cellSize, Vector2i gridSize, Dictionary<CellState, Color> stateToColorMap)
             : base(cellSize, gridSize)
         {
             m_StateToColorMap = stateToColorMap;

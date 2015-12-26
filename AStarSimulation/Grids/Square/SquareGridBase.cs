@@ -1,7 +1,7 @@
 ﻿using SFML.Graphics;
 using SFML.System;
 
-namespace AStarSimulation
+namespace AStarSimulation.Grids.Square
 {
     internal abstract class SquareGridBase : Transformable, Drawable
     {
