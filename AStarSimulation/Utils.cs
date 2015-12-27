@@ -26,10 +26,6 @@ namespace AStarSimulation
         /// <summary>
         /// Return whether or not the two position vectors are within a specified range of eachother
         /// </summary>
-        /// <param name="u"></param>
-        /// <param name="v"></param>
-        /// <param name="range"></param>
-        /// <returns></returns>
         public static bool WithinRange(Vector2f u, Vector2f v, double range)
         {
             if (Math.Abs(u.X - v.X) > range)
@@ -44,11 +40,6 @@ namespace AStarSimulation
         /// Distance receives the range between them. Distance will be double.PositiveInfiniy if vectors
         /// are not within range of eachother.
         /// </summary>
-        /// <param name="u"></param>
-        /// <param name="v"></param>
-        /// <param name="range"></param>
-        /// <param name="distance"></param>
-        /// <returns></returns>
         public static bool WithinRange(Vector2f u, Vector2f v, double range, out double distance)
         {
             if (Math.Abs(u.X - v.X) > range)

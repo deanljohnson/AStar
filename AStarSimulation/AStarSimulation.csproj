@@ -56,7 +56,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CellState.cs" />
-    <Compile Include="Grids\Hex\HexGrid.cs" />
+    <Compile Include="Grids\HexGrid.cs" />
     <Compile Include="IIndexedPathfindingMap.cs" />
     <Compile Include="Grids\Square\SquareGridBase.cs" />
     <Compile Include="Grids\Square\SquareGrid.cs" />
@@ -88,6 +88,9 @@
     <Content Include="libs\SFNetHex.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Grids\Hex\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

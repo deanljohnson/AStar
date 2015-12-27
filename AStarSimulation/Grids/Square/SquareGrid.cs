@@ -12,7 +12,6 @@ namespace AStarSimulation.Grids.Square
         private Dictionary<CellState, Color> m_StateToColorMap { get; }
 
         public int Count => GridSize.X*GridSize.Y;
-        public Vector2i Dimensions => GridSize;
 
         public SquareGrid(Vector2i cellSize, Vector2i gridSize, Dictionary<CellState, Color> stateToColorMap)
             : base(cellSize, gridSize)
@@ -55,7 +54,7 @@ namespace AStarSimulation.Grids.Square
             }
         }
 
-        public Vector2i PixelToIndex(Vector2i p)
+        public Vector2i PixelToHex(Vector2i p)
         {
             var index = new Vector2i(p.X / CellSize.X, p.Y / CellSize.Y);
             return index;

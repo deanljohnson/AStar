@@ -5,15 +5,14 @@ using SFML.Graphics;
 using SFML.System;
 using SFNetHex;
 
-namespace AStarSimulation.Grids.Hex
+namespace AStarSimulation.Grids
 {
-    internal class HexGrid : HexMap, IIndexedPathfindingMap
+    internal class HexGrid : DrawableHexMap, IIndexedPathfindingMap
     {
         private static readonly Random Random = new Random();
         private Dictionary<CellState, Color> m_StateToColorMap { get; }
 
-        public int Count => HexTable.Count;
-        public Vector2i Dimensions => new Vector2i(0, 0);
+        public int Count => HexSet.Count;
 
         public HexGrid(int rad, Orientation o, Vector2f cellSize, Dictionary<CellState, Color> stateToColorMap) 
             : base(rad, o, cellSize)
@@ -23,14 +22,14 @@ namespace AStarSimulation.Grids.Hex
 
         public void Set(Vector2i i, CellState s)
         {
-            SetColorOfCell(i, m_StateToColorMap[s]);
+            SetColorOfCell(i.X, i.Y, m_StateToColorMap[s]);
         }
 
         public void Set(IEnumerable<Vector2i> indices, CellState s)
         {
             foreach (var i in indices)
             {
-                SetColorOfCell(i, m_StateToColorMap[s]);
+                SetColorOfCell(i.X, i.Y, m_StateToColorMap[s]);
             }
         }
 
@@ -41,35 +40,31 @@ namespace AStarSimulation.Grids.Hex
 
         public bool Is(Vector2i i, CellState s)
         {
-            return GetColorOfCell(i) == m_StateToColorMap[s];
+            return GetColorOfCell(i.X, i.Y) == m_StateToColorMap[s];
         }
 
         public Vector2i RandomOpenCell()
         {
             while (true)
             {
-                var allVectors = HexTable.Keys.ToList();
-                var randomVector = allVectors[Random.Next(allVectors.Count)];
+                var index = Random.Next(HexSet.Count);
+                var hex = HexSet.ElementAt(index);
+                var v = new Vector2i(hex.X, hex.Y);
 
-                if (!Is(randomVector, CellState.Wall))
-                    return randomVector;
+                if (!Is(v, CellState.Wall))
+                    return v;
             }
             
         }
 
-        public Vector2i PixelToIndex(Vector2i p)
+        public Vector2i PixelToHex(Vector2i p)
         {
-            var hex = HexUtils.PixelToHex(new Vector2f(p.X, p.Y), Layout);
-            hex = hex.RoundHex();
+            var i = GetNearestWholeHex(new Vector2f(p.X, p.Y));
 
-            foreach (var hexColorPair in HexTable)
+            if (HexSet.Contains(i))
             {
-                if (hexColorPair.Value.Hex == hex)
-                {
-                    return hexColorPair.Key;
-                }
+                return new Vector2i(i.X, i.Y);
             }
-
             throw new ArgumentException($"No index corresponds to {p}");
         }
 
@@ -92,16 +87,10 @@ namespace AStarSimulation.Grids.Hex
 
             for (var i = 0; i < neighbors.Count; i++)
             {
-                try
+                if (!HexSet.Contains(new Hex(neighbors[i].X, neighbors[i].Y))|| Is(neighbors[i], CellState.Wall))
                 {
-                    if (!HexTable.ContainsKey(neighbors[i]) || Is(neighbors[i], CellState.Wall))
-                    {
-                        neighbors.RemoveAt(i);
-                        i--;
-                    }
-                }
-                catch (ArgumentException)
-                {
+                    neighbors.RemoveAt(i);
+                    i--;
                 }
             }
 

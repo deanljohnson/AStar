@@ -12,19 +12,14 @@ namespace AStarSimulation
         int Count { get; }
 
         /// <summary>
-        /// Returns the x/y dimensions of the map. Does not necessarily have geometric significance.
-        /// </summary>
-        Vector2i Dimensions { get; }
-
-        /// <summary>
-        /// Sets the state of the cell at index i to s
+        /// Sets the state of the cell at i to s
         /// </summary>
         void Set(Vector2i i, CellState s);
 
         /// <summary>
         /// Sets the state of the given indices to s
         /// </summary>
-        void Set(IEnumerable<Vector2i> i, CellState s);
+        void Set(IEnumerable<Vector2i> indices, CellState s);
 
         /// <summary>
         /// Sets all cell states to the given state
@@ -44,7 +39,7 @@ namespace AStarSimulation
         /// <summary>
         /// Returns the index that most applies to the given pixel
         /// </summary>
-        Vector2i PixelToIndex(Vector2i p);
+        Vector2i PixelToHex(Vector2i p);
 
         double DistanceEstimate(Vector2i a, Vector2i b);
         List<Vector2i> NeighborsOfCell(Vector2i current);

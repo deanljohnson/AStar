@@ -15,7 +15,7 @@ namespace AStar
 
         private static Dictionary<T, T> m_Parents { get; set; }
         private static Dictionary<T, double> m_GValues { get; set; }
-        //We keep Closed and Open public for visualization demos
+        //We keep Closed and Open public for demo purposes
         public static HashSet<T> Closed { get; private set; }
         public static PriorityQueue<T, double> Open { get; private set; }
         // ReSharper disable once StaticMemberInGenericType

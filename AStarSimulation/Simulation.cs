@@ -5,7 +5,7 @@ using SFML.Graphics;
 using SFML.System;
 using SFML.Window;
 using AStar;
-using AStarSimulation.Grids.Hex;
+using AStarSimulation.Grids;
 using AStarSimulation.Grids.Square;
 using SFNetHex;
 
@@ -22,13 +22,13 @@ namespace AStarSimulation
         private const Keyboard.Key RUN_ONCE_KEY = Keyboard.Key.Return;
         private const double WALL_DENSITY = .95;
 
-        private static readonly Random Random = new Random();
         private readonly RenderWindow m_Window;
         private IIndexedPathfindingMap m_Grid;
         private Vector2i m_Start;
         private Vector2i m_End;
         private bool m_RunContinuously;
         private bool m_RunThisUpdate;
+        private bool m_PathfindingComplete;
 
         public Simulation(RenderWindow window)
         {
@@ -38,7 +38,8 @@ namespace AStarSimulation
             m_Window.MouseMoved += MouseMovedEvent;
 
             //BuildSquareGrid(new Vector2i(5, 5));
-            BuildHexGrid(50, new Vector2f(5, 5));
+            BuildHexGrid(80, new Vector2f(3, 3));
+            ResetGraph();
 
             AStar<Vector2i>.HeuristicScale = 1;
         }
@@ -52,7 +53,10 @@ namespace AStarSimulation
 
             if (m_RunThisUpdate)
             {
-                ResetGraph();
+                if (m_PathfindingComplete)
+                {
+                    ResetGraph();
+                }
                 RunOnce();
                 m_RunThisUpdate = false;
             }
@@ -68,12 +72,13 @@ namespace AStarSimulation
             m_Stopwatch.Start();
             var path = AStar<Vector2i>.PathFind(m_Start, m_End, m_Grid.NeighborsOfCell, m_Grid.DistanceEstimate);
             m_Stopwatch.Stop();
-
+            
             if (path == null)
             {
                 throw new Exception("AStar returned a null path");
             }
 
+            m_PathfindingComplete = true;
             var pathFindingTime = m_Stopwatch.ElapsedMilliseconds;
             m_TotalPathFindingTime += pathFindingTime;
             m_PathsComputed++;
@@ -139,7 +144,7 @@ namespace AStarSimulation
 
         private void BuildHexGrid(int radius, Vector2f hexSize)
         {
-            m_Grid = new HexGrid(radius, Orientation.LayoutFlat, hexSize, new Dictionary<CellState, Color>
+            m_Grid = new HexGrid(radius, Orientation.Flat, hexSize, new Dictionary<CellState, Color>
             {
                 {CellState.None, Color.Black},
                 {CellState.Open, Color.Yellow},
@@ -152,9 +157,10 @@ namespace AStarSimulation
             { Position = new Vector2f(m_Window.Size.X / 2f, m_Window.Size.Y / 2f) };
         }
 
+        //Kept here for future reference for when I revisit the idea of automatic obstacles
         private void BuildObstacles()
         {
-            for (var y = 0; y < m_Grid.Dimensions.Y; y++)
+            /*for (var y = 0; y < m_Grid.Dimensions.Y; y++)
             {
                 for (var x = 0; x < m_Grid.Dimensions.X; x++)
                 {
@@ -167,7 +173,7 @@ namespace AStarSimulation
                         }
                     }
                 }
-            }
+            }*/
         }
 
         private void KeyReleasedEvent(object sender, KeyEventArgs e)
@@ -178,7 +184,16 @@ namespace AStarSimulation
             }
             else if (e.Code.Equals(RUN_ONCE_KEY))
             {
-                m_RunThisUpdate = true;
+                if (m_PathfindingComplete)
+                {
+                    ResetGraph();
+                    m_PathfindingComplete = false;
+                }
+                else
+                {
+                    m_RunThisUpdate = true;
+                }
+                
             }
         }
 
@@ -186,7 +201,7 @@ namespace AStarSimulation
         {
             if (e.Button.Equals(Mouse.Button.Left))
             {
-                var nodeClicked = m_Grid.PixelToIndex(new Vector2i(e.X, e.Y));
+                var nodeClicked = m_Grid.PixelToHex(new Vector2i(e.X, e.Y));
 
                 m_Grid.Set(nodeClicked, CellState.Wall);
             }
@@ -196,7 +211,7 @@ namespace AStarSimulation
         {
             if (Mouse.IsButtonPressed(Mouse.Button.Left))
             {
-                var nodeClicked = m_Grid.PixelToIndex(new Vector2i(e.X, e.Y));
+                var nodeClicked = m_Grid.PixelToHex(new Vector2i(e.X, e.Y));
 
                 m_Grid.Set(nodeClicked, CellState.Wall);
                 var neighbors = m_Grid.NeighborsOfCell(nodeClicked);
