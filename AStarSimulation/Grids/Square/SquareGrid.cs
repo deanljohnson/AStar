@@ -54,7 +54,7 @@ namespace AStarSimulation.Grids.Square
             }
         }
 
-        public Vector2i PixelToHex(Vector2i p)
+        public Vector2i PixelToIndex(Vector2i p)
         {
             var index = new Vector2i(p.X / CellSize.X, p.Y / CellSize.Y);
             return index;

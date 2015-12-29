@@ -1,36 +1,42 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using PriorityQueue;
 
 namespace AStar
 {
-    public static class AStar<T> where T : IEquatable<T>
+    public class AStar<T> where T : IEquatable<T>
     {
+        /// <summary>
+        /// A function that returns the neighbors of a given node.
+        /// </summary>
+        private Func<T, IList<T>> m_NeighborsFunc { get; }
 
-        static AStar()
-        {
-            HeuristicScale = 1.0;
-        }
+        /// <summary>
+        /// A function that return the estimated distance between two nodes.
+        /// </summary>
+        private Func<T, T, double> m_DistanceFunc { get; }
 
-        private static Dictionary<T, T> m_Parents { get; set; }
-        private static Dictionary<T, double> m_GValues { get; set; }
+        private Dictionary<T, T> m_Parents { get; set; }
+        private Dictionary<T, double> m_GValues { get; set; }
         //We keep Closed and Open public for demo purposes
-        public static HashSet<T> Closed { get; private set; }
-        public static PriorityQueue<T, double> Open { get; private set; }
+        public HashSet<T> Closed { get; private set; }
+        public PriorityQueue<T, double> Open { get; private set; }
         // ReSharper disable once StaticMemberInGenericType
-        public static double HeuristicScale { get; set; }
+        public double HeuristicScale { get; set; }
+
+        public AStar(Func<T, IList<T>> getNeighbors, Func<T, T, double> distanceFunc, double heuristic = 1.0)
+        {
+            HeuristicScale = heuristic;
+            m_NeighborsFunc = getNeighbors;
+            m_DistanceFunc = distanceFunc;
+        }
 
         /// <summary>
         ///     Returns an efficient path from start to end. If no path exists, algorithm will run forever.
         /// </summary>
-        /// <param name="start">The start point</param>
-        /// <param name="end">The end point</param>
-        /// <param name="getNeighbors">A function returning the neighbors of any node</param>
-        /// <param name="distanceFunc">A function returning the approximate distance between two nodes</param>
-        /// <returns></returns>
-        public static Stack<T> PathFind(T start, T end, Func<T, IList<T>> getNeighbors,
-            Func<T, T, double> distanceFunc)
+        public Stack<T> PathFind(T start, T end)
         {
             if (start.Equals(end))
             {
@@ -39,12 +45,7 @@ namespace AStar
                 return ret;
             }
 
-            Closed = new HashSet<T>();
-            Open = new PriorityQueue<T, double>();
-            Open.Enqueue(start, 0);
-
-            m_GValues = new Dictionary<T, double> {{start, 0.0}, {end, 0.0}};
-            m_Parents = new Dictionary<T, T>();
+            InitializeCollections(start, end);
 
             while (Open.Any())
             {
@@ -58,14 +59,14 @@ namespace AStar
 
                 Closed.Add(currentNode);
 
-                var neighbors = CallGetNeighbors(currentNode, getNeighbors);
+                var neighbors = CallGetNeighbors(currentNode);
                 foreach (var i in neighbors)
                 {
                     if (Closed.Contains(i))
                         continue;
 
-                    var currentG = m_GValues[currentNode] + distanceFunc(currentNode, i);
-                    var potentialF = currentG + (distanceFunc(i, end)*HeuristicScale);
+                    var currentG = m_GValues[currentNode] + m_DistanceFunc(currentNode, i);
+                    var potentialF = currentG + (m_DistanceFunc(i, end) * HeuristicScale);
 
                     if (!Open.Contains(i))
                     {
@@ -86,11 +87,67 @@ namespace AStar
         }
 
         /// <summary>
+        /// Expands one node, examining it's neighbors. Returns null until a path is found.
+        /// </summary>
+        public Stack<T> PathFindOneStep(T start, T end)
+        {
+            if (Open == null)
+            {
+                InitializeCollections(start, end);
+            }
+
+            Debug.Assert(Open != null, "Collections were not initialized correctly");
+
+            //Take the most promising node
+            var currentNode = Open.Dequeue();
+
+            if (currentNode == null || currentNode.Equals(end))
+            {
+                return ConstructBestPath(start, end);
+            }
+
+            Closed.Add(currentNode);
+
+            var neighbors = CallGetNeighbors(currentNode);
+            foreach (var neighbor in neighbors)
+            {
+                if (Closed.Contains(neighbor))
+                    continue;
+
+                var neighborG = m_GValues[currentNode] + m_DistanceFunc(currentNode, neighbor);
+                var potentialF = neighborG + (m_DistanceFunc(neighbor, end) * HeuristicScale);
+
+                if (!Open.Contains(neighbor))
+                {
+                    SetParent(neighbor, currentNode);
+                    m_GValues[neighbor] = neighborG;
+                    Open.Enqueue(neighbor, potentialF);
+                }
+                else if (potentialF < Open.GetPriority(neighbor))
+                {
+                    SetParent(neighbor, currentNode);
+                    m_GValues[neighbor] = neighborG;
+                    Open.SetPriority(neighbor, potentialF);
+                }
+            }
+
+            return null;
+        }
+
+        private void InitializeCollections(T start, T end)
+        {
+            Closed = new HashSet<T>();
+            Open = new PriorityQueue<T, double>();
+            Open.Enqueue(start, 0);
+
+            m_GValues = new Dictionary<T, double> { { start, 0.0 }, { end, 0.0 } };
+            m_Parents = new Dictionary<T, T>();
+        }
+
+        /// <summary>
         ///     Sets the parent of the given node. If the node already has a parent assigned, the previous parent is overwritten
         /// </summary>
-        /// <param name="node"></param>
-        /// <param name="parent"></param>
-        private static void SetParent(T node, T parent)
+        private void SetParent(T node, T parent)
         {
             if (m_Parents.ContainsKey(node))
             {
@@ -105,12 +162,9 @@ namespace AStar
         /// <summary>
         ///     Calls the GetNeighbors functions, creating G values for the node if the neighbor has not been seen before
         /// </summary>
-        /// <param name="node"></param>
-        /// <param name="getNeighbors"></param>
-        /// <returns></returns>
-        private static IEnumerable<T> CallGetNeighbors(T node, Func<T, IList<T>> getNeighbors)
+        private IEnumerable<T> CallGetNeighbors(T node)
         {
-            var neighbors = getNeighbors(node);
+            var neighbors = m_NeighborsFunc(node);
 
             foreach (var n in neighbors.Where(n => !m_GValues.ContainsKey(n)))
             {
@@ -121,23 +175,18 @@ namespace AStar
         }
 
         /// <summary>
-        ///     Builds the found path from start to end
+        ///     Builds the found path from start to end.
         /// </summary>
-        /// <param name="start"></param>
-        /// <param name="end"></param>
-        /// <returns></returns>
-        private static Stack<T> ConstructBestPath(T start, T end)
+        private Stack<T> ConstructBestPath(T start, T end)
         {
             var bestPath = new Stack<T>();
-            bestPath.Push(end);
 
-            var currentNode = m_Parents[end];
-            bestPath.Push(currentNode);
-
+            //Work backwards from the end node.
+            var currentNode = end;
             while (!currentNode.Equals(start))
             {
-                currentNode = m_Parents[currentNode];
                 bestPath.Push(currentNode);
+                currentNode = m_Parents[currentNode];
             }
 
             return bestPath;

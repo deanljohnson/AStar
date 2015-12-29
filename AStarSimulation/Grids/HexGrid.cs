@@ -57,7 +57,7 @@ namespace AStarSimulation.Grids
             
         }
 
-        public Vector2i PixelToHex(Vector2i p)
+        public Vector2i PixelToIndex(Vector2i p)
         {
             var i = GetNearestWholeHex(new Vector2f(p.X, p.Y));
 
@@ -87,7 +87,7 @@ namespace AStarSimulation.Grids
 
             for (var i = 0; i < neighbors.Count; i++)
             {
-                if (!HexSet.Contains(new Hex(neighbors[i].X, neighbors[i].Y))|| Is(neighbors[i], CellState.Wall))
+                if (!HexSet.Contains(new Hex(neighbors[i].X, neighbors[i].Y)) || Is(neighbors[i], CellState.Wall))
                 {
                     neighbors.RemoveAt(i);
                     i--;

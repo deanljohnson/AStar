@@ -39,7 +39,7 @@ namespace AStarSimulation
         /// <summary>
         /// Returns the index that most applies to the given pixel
         /// </summary>
-        Vector2i PixelToHex(Vector2i p);
+        Vector2i PixelToIndex(Vector2i p);
 
         double DistanceEstimate(Vector2i a, Vector2i b);
         List<Vector2i> NeighborsOfCell(Vector2i current);
