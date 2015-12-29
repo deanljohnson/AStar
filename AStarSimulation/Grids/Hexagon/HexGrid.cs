@@ -5,14 +5,14 @@ using SFML.Graphics;
 using SFML.System;
 using SFNetHex;
 
-namespace AStarSimulation.Grids
+namespace AStarSimulation.Grids.Hexagon
 {
-    internal class HexGrid : DrawableHexMap, IIndexedPathfindingMap
+    internal class HexGrid : DrawableHexSet, IIndexedPathfindingMap
     {
         private static readonly Random Random = new Random();
         private Dictionary<CellState, Color> m_StateToColorMap { get; }
 
-        public int Count => HexSet.Count;
+        public int Count => ColorTable.Count;
 
         public HexGrid(int rad, Orientation o, Vector2f cellSize, Dictionary<CellState, Color> stateToColorMap) 
             : base(rad, o, cellSize)
@@ -47,8 +47,8 @@ namespace AStarSimulation.Grids
         {
             while (true)
             {
-                var index = Random.Next(HexSet.Count);
-                var hex = HexSet.ElementAt(index);
+                var index = Random.Next(ColorTable.Count);
+                var hex = ColorTable.ElementAt(index).Key;
                 var v = new Vector2i(hex.X, hex.Y);
 
                 if (!Is(v, CellState.Wall))
@@ -61,7 +61,7 @@ namespace AStarSimulation.Grids
         {
             var i = GetNearestWholeHex(new Vector2f(p.X, p.Y));
 
-            if (HexSet.Contains(i))
+            if (ColorTable.ContainsKey(i))
             {
                 return new Vector2i(i.X, i.Y);
             }
@@ -87,7 +87,7 @@ namespace AStarSimulation.Grids
 
             for (var i = 0; i < neighbors.Count; i++)
             {
-                if (!HexSet.Contains(new Hex(neighbors[i].X, neighbors[i].Y)) || Is(neighbors[i], CellState.Wall))
+                if (!ColorTable.ContainsKey(new Hex(neighbors[i].X, neighbors[i].Y)) || Is(neighbors[i], CellState.Wall))
                 {
                     neighbors.RemoveAt(i);
                     i--;

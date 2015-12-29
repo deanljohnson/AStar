@@ -56,10 +56,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CellState.cs" />
-    <Compile Include="Grids\HexGrid.cs" />
+    <Compile Include="PathfindingData.cs" />
+    <Compile Include="Grids\Hexagon\DrawableHexMap.cs" />
+    <Compile Include="Grids\Hexagon\HexGrid.cs" />
     <Compile Include="IIndexedPathfindingMap.cs" />
     <Compile Include="Grids\Square\SquareGridBase.cs" />
     <Compile Include="Grids\Square\SquareGrid.cs" />
+    <Compile Include="PathfindingGraphState.cs" />
+    <Compile Include="SimulationAction.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Simulation.cs" />

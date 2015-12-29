@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using AStar;
+using AStarSimulation.Grids.Hexagon;
+using AStarSimulation.Grids.Square;
 using SFML.Graphics;
 using SFML.System;
 using SFML.Window;
-using AStar;
-using AStarSimulation.Grids;
-using AStarSimulation.Grids.Square;
 using SFNetHex;
 
 namespace AStarSimulation
@@ -14,9 +14,7 @@ namespace AStarSimulation
     internal class Simulation
     {
         private readonly Stopwatch m_Stopwatch = new Stopwatch();
-        private long m_TotalNodesVisited;
-        private long m_TotalPathFindingTime;
-        private long m_PathsComputed;
+        private PathfindingData m_Data;
 
         private const Keyboard.Key START_CONTINUOUS_KEY = Keyboard.Key.Space;
         private const Keyboard.Key RUN_ONCE_KEY = Keyboard.Key.Return;
@@ -28,10 +26,8 @@ namespace AStarSimulation
         private IIndexedPathfindingMap m_Grid;
         private Vector2i m_Start;
         private Vector2i m_End;
-        private bool m_RunContinuously;
-        private bool m_RunThisUpdate;
-        private bool m_RunOneStep;
-        private bool m_PathfindingComplete;
+        private SimulationAction m_SimulationAction;
+        private PathfindingGraphState m_GraphState;
 
         public Simulation(RenderWindow window)
         {
@@ -47,24 +43,23 @@ namespace AStarSimulation
 
         public void Update()
         {
-            if (m_RunContinuously)
+            if (m_SimulationAction == SimulationAction.RunContinuously)
             {
-                m_RunThisUpdate = true;
-                if (m_PathfindingComplete)
+                if (m_GraphState == PathfindingGraphState.Finished)
                 {
                     ResetGraph();
                 }
+                FullRunOnce();
             }
-
-            if (m_RunThisUpdate)
+            else if (m_SimulationAction == SimulationAction.RunOnce)
             {
                 FullRunOnce();
-                m_RunThisUpdate = false;
+                m_SimulationAction = SimulationAction.None;
             }
-            else if (m_RunOneStep)
+            else if (m_SimulationAction == SimulationAction.RunOneStep)
             {
                 RunOneStep();
-                m_RunOneStep = false;
+                m_SimulationAction = SimulationAction.None;
             }
         }
 
@@ -99,34 +94,31 @@ namespace AStarSimulation
             }
             else
             {
+                m_GraphState = PathfindingGraphState.InProgress;
                 ColorGridFromPathData(null);
             }
         }
 
         private void ReportPathFinished(Stack<Vector2i> path)
         {
-            m_PathfindingComplete = true;
+            m_GraphState = PathfindingGraphState.Finished;
             var pathFindingTime = m_Stopwatch.ElapsedMilliseconds;
-            m_TotalPathFindingTime += pathFindingTime;
-            m_PathsComputed++;
             m_Stopwatch.Reset();
 
             var pathLength = path.Count;
             var nodesVisited = m_AStar.Open.Count + m_AStar.Closed.Count;
-            m_TotalNodesVisited += nodesVisited;
 
             ColorGridFromPathData(path);
 
-            Console.Clear();
-            Console.WriteLine("Heuristic: " + m_AStar.HeuristicScale);
-            Console.WriteLine("Graph Size: {0}", m_Grid.Count);
-            Console.WriteLine("Time Taken: " + pathFindingTime + "ms");
-            Console.WriteLine("Path Length: " + pathLength);
-            Console.WriteLine("Nodes Visited: " + nodesVisited);
-            Console.WriteLine("Paths Computed: " + m_PathsComputed);
-            Console.WriteLine("Average Nodes Visited: " + m_TotalNodesVisited / m_PathsComputed);
-            Console.WriteLine("Average Time: " + m_TotalPathFindingTime / (float)m_PathsComputed + "ms");
-            Console.WriteLine("Total Time in Pathfinding: " + m_TotalPathFindingTime / 1000f + "s");
+            m_Data.HeuristicUsed = m_AStar.HeuristicScale;
+            m_Data.GraphSize = m_Grid.Count;
+            m_Data.PathfindingTime = pathFindingTime;
+            m_Data.TotalPathfindingTime += pathFindingTime;
+            m_Data.PathLength = pathLength;
+            m_Data.NodesVisited = nodesVisited;
+            m_Data.TotalNodesVisited += nodesVisited;
+            m_Data.PathsComputed++;
+            m_Data.OutputData();
         }
 
         private void ColorGridFromPathData(Stack<Vector2i> path)
@@ -149,8 +141,7 @@ namespace AStarSimulation
             m_AStar = new AStar<Vector2i>(m_Grid.NeighborsOfCell, m_Grid.DistanceEstimate);
             ResetNodes();
             SetStartAndEnd();
-            m_PathfindingComplete = false;
-            //BuildObstacles();
+            m_GraphState = PathfindingGraphState.Ready;
         }
 
         private void ResetNodes()
@@ -223,29 +214,31 @@ namespace AStarSimulation
         {
             if (e.Code.Equals(START_CONTINUOUS_KEY))
             {
-                m_RunContinuously = !m_RunContinuously;
+                m_SimulationAction = m_SimulationAction == SimulationAction.RunContinuously 
+                                        ? SimulationAction.None 
+                                        : SimulationAction.RunContinuously;
             }
             else if (e.Code.Equals(RUN_ONCE_KEY))
             {
-                if (m_PathfindingComplete)
+                if (m_GraphState == PathfindingGraphState.Finished)
                 {
                     ResetGraph();
                 }
                 else
                 {
-                    m_RunThisUpdate = true;
+                    m_SimulationAction = SimulationAction.RunOnce;
                 }
                 
             }
             else if (e.Code.Equals(RUN_ONE_STEP_KEY))
             {
-                if (m_PathfindingComplete)
+                if (m_GraphState == PathfindingGraphState.Finished)
                 {
                     ResetGraph();
                 }
                 else
                 {
-                    m_RunOneStep = true;
+                    m_SimulationAction = SimulationAction.RunOneStep;
                 }
             }
         }
