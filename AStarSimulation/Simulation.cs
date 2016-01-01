@@ -11,61 +11,156 @@ using SFNetHex;
 
 namespace AStarSimulation
 {
-    internal class Simulation
+    public class Simulation
     {
+        private readonly Dictionary<CellState, Color> m_StateToColorMap = new Dictionary<CellState, Color>
+        {
+            {CellState.None, Color.Black},
+            {CellState.Open, Color.Yellow},
+            {CellState.Closed, Color.Blue},
+            {CellState.End, Color.Red},
+            {CellState.Start, Color.Green},
+            {CellState.Path, Color.Cyan},
+            {CellState.Wall, new Color(200, 200, 200)}
+        }; 
+
         private readonly Stopwatch m_Stopwatch = new Stopwatch();
         private PathfindingData m_Data;
 
-        private const Keyboard.Key START_CONTINUOUS_KEY = Keyboard.Key.Space;
-        private const Keyboard.Key RUN_ONCE_KEY = Keyboard.Key.Return;
-        private const Keyboard.Key RUN_ONE_STEP_KEY = Keyboard.Key.Right;
-        private const double WALL_DENSITY = .95;
-
         private readonly RenderWindow m_Window;
-        private AStar<Vector2i> m_AStar;
+
         private IIndexedPathfindingMap m_Grid;
+        private const double WALL_DENSITY = .95;
+        private AStar<Vector2i> m_AStar;
         private Vector2i m_Start;
         private Vector2i m_End;
-        private SimulationAction m_SimulationAction;
         private PathfindingGraphState m_GraphState;
+        private SimulationAction m_SimulationAction;
+        private GridType m_GridType;
+        private Vector2i m_NodeSize;
 
-        public Simulation(RenderWindow window)
+        public Vector2i NodeSize {
+            get { return m_NodeSize; }
+            set
+            {
+                if (m_NodeSize == value)
+                {
+                    return;
+                }
+
+                m_NodeSize = value;
+                RebuildGraph();
+            }
+        }
+
+        public GridType GridType
+        {
+            get { return m_GridType; }
+            set
+            {
+                if (m_GridType == value) return;
+
+                m_GridType = value;
+                RebuildGraph();
+            }
+        }
+
+        public SimulationAction SimulationAction
+        {
+            get { return m_SimulationAction; }
+            set {
+                if (m_SimulationAction == value) return;
+
+                SwitchSimulationAction(value);
+            }
+        }
+
+        public Simulation(RenderWindow window, GridType gridType, Vector2i nodeSize)
         {
             m_Window = window;
-            m_Window.KeyReleased += KeyReleasedEvent;
             m_Window.MouseButtonPressed += MousePressedEvent;
             m_Window.MouseMoved += MouseMovedEvent;
 
-            BuildSquareGrid(new Vector2i(30, 30));
-            //BuildHexGrid(80, new Vector2f(3, 3));
-            ResetGraph();
+            SimulationAction = SimulationAction.None;
+
+            m_NodeSize = nodeSize;
+            m_GridType = gridType;
+            RebuildGraph();
         }
 
         public void Update()
         {
-            if (m_SimulationAction == SimulationAction.RunContinuously)
+            switch (SimulationAction)
             {
-                if (m_GraphState == PathfindingGraphState.Finished)
-                {
-                    ResetGraph();
-                }
-                FullRunOnce();
-            }
-            else if (m_SimulationAction == SimulationAction.RunOnce)
-            {
-                FullRunOnce();
-                m_SimulationAction = SimulationAction.None;
-            }
-            else if (m_SimulationAction == SimulationAction.RunOneStep)
-            {
-                RunOneStep();
-                m_SimulationAction = SimulationAction.None;
+                case SimulationAction.RunContinuously:
+                    if (m_GraphState == PathfindingGraphState.Finished)
+                    {
+                        ResetGraph();
+                    }
+                    FullRunOnce();
+                    break;
+                case SimulationAction.RunOnce:
+                    FullRunOnce();
+                    SimulationAction = SimulationAction.None;
+                    break;
+                case SimulationAction.RunOneStep:
+                    RunOneStep();
+                    SimulationAction = SimulationAction.None;
+                    break;
             }
         }
 
         public void Render()
         {
             m_Window.Draw(m_Grid);
+        }
+
+        private void RebuildGraph()
+        {
+            switch (m_GridType)
+            {
+                case GridType.Square:
+                    m_Grid = BuildSquareGrid(m_NodeSize);
+                    SimulationAction = SimulationAction.None;
+                    ResetGraph();
+                    break;
+                case GridType.Hex:
+                    m_Grid = BuildHexGrid(m_NodeSize);
+                    SimulationAction = SimulationAction.None;
+                    ResetGraph();
+                    break;
+            }
+        }
+
+        private void SwitchSimulationAction(SimulationAction newAction)
+        {
+            m_SimulationAction = SimulationAction.None;
+            switch (newAction)
+            {
+                case SimulationAction.RunContinuously:
+                    m_SimulationAction = newAction;
+                    break;
+                case SimulationAction.RunOnce:
+                    if (m_GraphState == PathfindingGraphState.Finished)
+                    {
+                        ResetGraph();
+                    }
+                    else
+                    {
+                        m_SimulationAction = newAction;
+                    }
+                    break;
+                case SimulationAction.RunOneStep:
+                    if (m_GraphState == PathfindingGraphState.Finished)
+                    {
+                        ResetGraph();
+                    }
+                    else
+                    {
+                        m_SimulationAction = newAction;
+                    }
+                    break;
+            }
         }
 
         private void FullRunOnce()
@@ -162,39 +257,29 @@ namespace AStarSimulation
             m_Grid.Set(m_End, CellState.End);
         }
 
-        private void BuildSquareGrid(Vector2i nodeSize)
+        private IIndexedPathfindingMap BuildSquareGrid(Vector2i nodeSize)
         {
-            m_Grid = new SquareGrid(nodeSize, new Vector2i((int)(m_Window.Size.X / nodeSize.X), (int)(m_Window.Size.Y / nodeSize.Y)), new Dictionary<CellState, Color>
-            {
-                {CellState.None, Color.Black},
-                {CellState.Open, Color.Yellow},
-                {CellState.Closed, Color.Blue},
-                {CellState.End, Color.Red},
-                {CellState.Start, Color.Green},
-                {CellState.Path, Color.Cyan},
-                {CellState.Wall, new Color(200, 200, 200)}
-            });
+            var gridSize = new Vector2i((int) (m_Window.Size.X/nodeSize.X), (int) (m_Window.Size.Y/nodeSize.Y));
+            return new SquareGrid(nodeSize, gridSize, m_StateToColorMap);
         }
 
-        private void BuildHexGrid(int radius, Vector2f hexSize)
+        private IIndexedPathfindingMap BuildHexGrid(Vector2i hexSize)
         {
-            m_Grid = new HexGrid(radius, Orientation.Flat, hexSize, new Dictionary<CellState, Color>
-            {
-                {CellState.None, Color.Black},
-                {CellState.Open, Color.Yellow},
-                {CellState.Closed, Color.Blue},
-                {CellState.End, Color.Red},
-                {CellState.Start, Color.Green},
-                {CellState.Path, Color.Cyan},
-                {CellState.Wall, new Color(200, 200, 200)}
-            })
+            var floatHexSize = new Vector2f(hexSize.X, hexSize.Y);
+            var testHex = new HexShape(new Layout(Orientation.Flat, floatHexSize, new Vector2f(0, 0)));
+            var size = new Vector2f(testHex.GetLocalBounds().Width, testHex.GetLocalBounds().Height);
+            //We subtract one to handle the center hex
+            var vertRadius = m_Window.Size.Y/(2f*size.Y) - 1;
+            var horizRadius = m_Window.Size.X/(2f*size.X) - 1;
+             
+            return new HexGrid((int) Math.Min(vertRadius, horizRadius), Orientation.Flat, floatHexSize, m_StateToColorMap)
             { Position = new Vector2f(m_Window.Size.X / 2f, m_Window.Size.Y / 2f) };
         }
 
         //Kept here for future reference for when I revisit the idea of automatic obstacles
-        private void BuildObstacles()
+        /*private void BuildObstacles()
         {
-            /*for (var y = 0; y < m_Grid.Dimensions.Y; y++)
+            for (var y = 0; y < m_Grid.Dimensions.Y; y++)
             {
                 for (var x = 0; x < m_Grid.Dimensions.X; x++)
                 {
@@ -207,49 +292,22 @@ namespace AStarSimulation
                         }
                     }
                 }
-            }*/
-        }
-
-        private void KeyReleasedEvent(object sender, KeyEventArgs e)
-        {
-            if (e.Code.Equals(START_CONTINUOUS_KEY))
-            {
-                m_SimulationAction = m_SimulationAction == SimulationAction.RunContinuously 
-                                        ? SimulationAction.None 
-                                        : SimulationAction.RunContinuously;
             }
-            else if (e.Code.Equals(RUN_ONCE_KEY))
-            {
-                if (m_GraphState == PathfindingGraphState.Finished)
-                {
-                    ResetGraph();
-                }
-                else
-                {
-                    m_SimulationAction = SimulationAction.RunOnce;
-                }
-                
-            }
-            else if (e.Code.Equals(RUN_ONE_STEP_KEY))
-            {
-                if (m_GraphState == PathfindingGraphState.Finished)
-                {
-                    ResetGraph();
-                }
-                else
-                {
-                    m_SimulationAction = SimulationAction.RunOneStep;
-                }
-            }
-        }
+        }*/
 
         private void MousePressedEvent(object sender, MouseButtonEventArgs e)
         {
             if (e.Button.Equals(Mouse.Button.Left))
             {
-                var nodeClicked = m_Grid.PixelToIndex(new Vector2i(e.X, e.Y));
-
-                m_Grid.Set(nodeClicked, CellState.Wall);
+                try
+                {
+                    var nodeClicked = m_Grid.PixelToIndex(new Vector2i(e.X, e.Y));
+                    m_Grid.Set(nodeClicked, CellState.Wall);
+                }
+                catch (ArgumentException)
+                {
+                    //The mouse was not on the grid, so we just ignore this mouse event
+                }
             }
         }
 
@@ -257,13 +315,20 @@ namespace AStarSimulation
         {
             if (Mouse.IsButtonPressed(Mouse.Button.Left))
             {
-                var nodeClicked = m_Grid.PixelToIndex(new Vector2i(e.X, e.Y));
-
-                m_Grid.Set(nodeClicked, CellState.Wall);
-                var neighbors = m_Grid.NeighborsOfCell(nodeClicked);
-                foreach (var i in neighbors)
+                try
                 {
-                    m_Grid.Set(i, CellState.Wall);
+                    var nodeAtMouse = m_Grid.PixelToIndex(new Vector2i(e.X, e.Y));
+                    var toMakeWalls = m_Grid.NeighborsOfCell(nodeAtMouse);
+                    toMakeWalls.Add(nodeAtMouse);
+
+                    foreach (var i in toMakeWalls)
+                    {
+                        m_Grid.Set(i, CellState.Wall);
+                    }
+                }
+                catch (ArgumentException)
+                {
+                    //The mouse was not on the grid, so we just ignore this mouse event
                 }
             }
         }

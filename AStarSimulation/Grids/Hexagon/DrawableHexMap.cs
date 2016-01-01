@@ -131,20 +131,12 @@ namespace AStarSimulation.Grids.Hexagon
 
         private ConvexShape BuildShape()
         {
-            var hex = HexUtils.PixelToHex(new Vector2f(0, 0), Layout).Round();
-            var shape = new ConvexShape(6)
+            return new HexShape(Layout)
             {
                 OutlineThickness = 1,
+                OutlineColor = Color.White,
                 FillColor = Color.Black
             };
-
-            var corners = hex.Corners(Layout);
-            for (var i = 0; i < corners.Count; i++)
-            {
-                shape.SetPoint((uint)i, corners[i]);
-            }
-
-            return shape;
         }
     }
 }

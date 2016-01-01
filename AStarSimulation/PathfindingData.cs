@@ -4,6 +4,21 @@ namespace AStarSimulation
 {
     internal struct PathfindingData
     {
+        private bool? m_ConsolePresent;
+        public bool ConsolePresent
+        {
+            get
+            {
+                if (m_ConsolePresent == null)
+                {
+                    m_ConsolePresent = true;
+                    try { var windowHeight = Console.WindowHeight; }
+                    catch { m_ConsolePresent = false; }
+                }
+                return m_ConsolePresent.Value;
+            }
+        }
+
         public double HeuristicUsed { get; set; }
         public int GraphSize { get; set; }
 
@@ -17,6 +32,7 @@ namespace AStarSimulation
 
         public void OutputData()
         {
+            if (!ConsolePresent) return;
             Console.Clear();
             Console.WriteLine("Heuristic: " + HeuristicUsed);
             Console.WriteLine("Graph Size: {0}", GraphSize);

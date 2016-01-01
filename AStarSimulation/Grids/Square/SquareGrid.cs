@@ -57,6 +57,12 @@ namespace AStarSimulation.Grids.Square
         public Vector2i PixelToIndex(Vector2i p)
         {
             var index = new Vector2i(p.X / CellSize.X, p.Y / CellSize.Y);
+
+            if (index.X < 0 || index.X >= GridSize.X || index.Y < 0 || index.Y >= GridSize.Y)
+            {
+                throw new ArgumentException($"No index corresponds to {p}");
+            }
+
             return index;
         }
 

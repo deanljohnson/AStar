@@ -1,5 +1,6 @@
 ﻿using System;
 using SFML.Graphics;
+using SFML.System;
 using SFML.Window;
 
 namespace AStarSimulation
@@ -12,7 +13,7 @@ namespace AStarSimulation
         {
             InitializeWindow();
 
-            var control = new Simulation(m_Window);
+            var control = new Simulation(m_Window, GridType.Hex, new Vector2i(5, 5));
 
             while (m_Window.IsOpen)
             {

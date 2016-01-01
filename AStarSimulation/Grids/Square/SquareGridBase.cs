@@ -16,7 +16,7 @@ namespace AStarSimulation.Grids.Square
             GridSize = gridSize;
             CellSize = cellSize;
             m_QuadArray = new VertexArray(PrimitiveType.Quads, (uint) (gridSize.X * gridSize.Y * 4));
-            m_LineArray = new VertexArray(PrimitiveType.Lines, (uint) (gridSize.X + gridSize.Y) * 2);
+            m_LineArray = new VertexArray(PrimitiveType.Lines, (uint) (gridSize.X + gridSize.Y + 2) * 2);
 
             for (uint y = 0; y < gridSize.Y; y++)
             {
@@ -35,14 +35,14 @@ namespace AStarSimulation.Grids.Square
                 }
             }
 
-            for (uint x = 0; x < gridSize.X; x++)
+            for (uint x = 0; x <= gridSize.X; x++)
             {
                 m_LineArray[x*2] = new Vertex(new Vector2f(x * cellSize.X, 0), Color.White);
                 m_LineArray[(x*2) + 1] = new Vertex(new Vector2f(x * cellSize.X, cellSize.Y * gridSize.Y), Color.White);
             }
 
-            var yOffset = (uint) (gridSize.X*2);
-            for (uint y = 0; y < gridSize.Y; y++)
+            var yOffset = (uint) ((gridSize.X + 1)*2);
+            for (uint y = 0; y <= gridSize.Y; y++)
             {
                 m_LineArray[yOffset + (y*2)] = new Vertex(new Vector2f(0, y * cellSize.Y), Color.White);
                 m_LineArray[yOffset + (y*2) + 1] = new Vertex(new Vector2f(cellSize.X * gridSize.X, y * cellSize.Y), Color.White);
@@ -92,7 +92,7 @@ namespace AStarSimulation.Grids.Square
             states.Transform.Combine(Transform);
 
             target.Draw(m_QuadArray, states);
-            target.Draw(m_LineArray);
+            target.Draw(m_LineArray, states);
         }
     }
 }
