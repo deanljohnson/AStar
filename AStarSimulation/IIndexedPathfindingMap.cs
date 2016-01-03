@@ -4,7 +4,7 @@ using SFML.System;
 
 namespace AStarSimulation
 {
-    interface IIndexedPathfindingMap : Drawable
+    public interface IIndexedPathfindingMap : Drawable
     {
         /// <summary>
         /// Return the number of cells in this map
@@ -41,7 +41,17 @@ namespace AStarSimulation
         /// </summary>
         Vector2i PixelToIndex(Vector2i p);
 
+        /// <summary>
+        /// Returns an estimation of the path length between a and b.
+        /// Should never over-estimate.
+        /// </summary>
         double DistanceEstimate(Vector2i a, Vector2i b);
+
+        /// <summary>
+        /// Returns neighbors of the given cell that are traversable
+        /// </summary>
+        /// <param name="current"></param>
+        /// <returns></returns>
         List<Vector2i> NeighborsOfCell(Vector2i current);
     }
 }

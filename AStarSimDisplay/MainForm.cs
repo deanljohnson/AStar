@@ -21,13 +21,19 @@ namespace AStarSimDisplay
         public MainForm()
         {
             InitializeComponent();
+            xNodeSizeTextBox.Validating += XNodeSizeTextBoxOnValidating;
+            yNodeSizeTextBox.Validating += YNodeSizeTextBoxOnValidating;
+            heuristicTextBox.Validating += HeuristicTextBoxOnValidating;
         }
 
         public void InitializeSim(RenderWindow window)
         {
             var x = int.Parse(xNodeSizeTextBox.Text);
             var y = int.Parse(yNodeSizeTextBox.Text);
-            Simulation = new Simulation(window, GetSelectedGridType(), new Vector2i(x, y));
+            Simulation = new Simulation(window, GetSelectedGridType(), new Vector2i(x, y))
+            {
+                Heuristic = float.Parse(heuristicTextBox.Text)
+            };
         }
 
         private void MainForm_Load(object sender, EventArgs e)
@@ -96,6 +102,18 @@ namespace AStarSimDisplay
             Simulation.NodeSize = new Vector2i(x, y);
         }
 
+        private void HeuristicTextBoxOnValidating(object sender, CancelEventArgs cancelEventArgs)
+        {
+            float h;
+            if (!float.TryParse(heuristicTextBox.Text, out h))
+            {
+                cancelEventArgs.Cancel = true;
+                return;
+            }
+
+            Simulation.Heuristic = h;
+        }
+
         private void SetSimGridTypeToSelected()
         {
             if (Simulation == null) return;
@@ -106,6 +124,11 @@ namespace AStarSimDisplay
         {
             var selectedString = gridTypeComboBox.Items[gridTypeComboBox.SelectedIndex].ToString();
             return m_GridTypeMap[selectedString];
+        }
+
+        private void saveEndPointsCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            Simulation.SaveEndPoints = saveEndPointsCheckBox.Checked;
         }
     }
 }

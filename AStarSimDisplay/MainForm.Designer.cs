@@ -41,7 +41,10 @@ namespace AStarSimDisplay
             this.yNodeSizeTextBox = new System.Windows.Forms.TextBox();
             this.xNodeSizeLabel = new System.Windows.Forms.Label();
             this.yNodeSizeLabel = new System.Windows.Forms.Label();
+            this.heuristicLabel = new System.Windows.Forms.Label();
+            this.heuristicTextBox = new System.Windows.Forms.TextBox();
             this.SFMLDrawingSurface = new AStarSimDisplay.SFMLDrawingSurface();
+            this.saveEndPointsCheckBox = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // gridTypeComboBox
@@ -108,7 +111,6 @@ namespace AStarSimDisplay
             this.xNodeSizeTextBox.Size = new System.Drawing.Size(82, 20);
             this.xNodeSizeTextBox.TabIndex = 7;
             this.xNodeSizeTextBox.Text = "5";
-            this.xNodeSizeTextBox.Validating += XNodeSizeTextBoxOnValidating;
             // 
             // yNodeSizeTextBox
             // 
@@ -117,7 +119,6 @@ namespace AStarSimDisplay
             this.yNodeSizeTextBox.Size = new System.Drawing.Size(82, 20);
             this.yNodeSizeTextBox.TabIndex = 8;
             this.yNodeSizeTextBox.Text = "5";
-            this.yNodeSizeTextBox.Validating += YNodeSizeTextBoxOnValidating;
             // 
             // xNodeSizeLabel
             // 
@@ -137,6 +138,23 @@ namespace AStarSimDisplay
             this.yNodeSizeLabel.TabIndex = 10;
             this.yNodeSizeLabel.Text = "Y";
             // 
+            // heuristicLabel
+            // 
+            this.heuristicLabel.AutoSize = true;
+            this.heuristicLabel.Location = new System.Drawing.Point(12, 252);
+            this.heuristicLabel.Name = "heuristicLabel";
+            this.heuristicLabel.Size = new System.Drawing.Size(48, 13);
+            this.heuristicLabel.TabIndex = 11;
+            this.heuristicLabel.Text = "Heuristic";
+            // 
+            // heuristicTextBox
+            // 
+            this.heuristicTextBox.Location = new System.Drawing.Point(12, 268);
+            this.heuristicTextBox.Name = "heuristicTextBox";
+            this.heuristicTextBox.Size = new System.Drawing.Size(100, 20);
+            this.heuristicTextBox.TabIndex = 12;
+            this.heuristicTextBox.Text = "1";
+            // 
             // SFMLDrawingSurface
             // 
             this.SFMLDrawingSurface.Location = new System.Drawing.Point(129, 12);
@@ -144,11 +162,25 @@ namespace AStarSimDisplay
             this.SFMLDrawingSurface.Size = new System.Drawing.Size(1443, 837);
             this.SFMLDrawingSurface.TabIndex = 0;
             // 
+            // saveEndPointsCheckBox
+            // 
+            this.saveEndPointsCheckBox.AutoSize = true;
+            this.saveEndPointsCheckBox.Location = new System.Drawing.Point(12, 294);
+            this.saveEndPointsCheckBox.Name = "saveEndPointsCheckBox";
+            this.saveEndPointsCheckBox.Size = new System.Drawing.Size(105, 17);
+            this.saveEndPointsCheckBox.TabIndex = 13;
+            this.saveEndPointsCheckBox.Text = "Save End Points";
+            this.saveEndPointsCheckBox.UseVisualStyleBackColor = true;
+            this.saveEndPointsCheckBox.CheckedChanged += new System.EventHandler(this.saveEndPointsCheckBox_CheckedChanged);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1584, 861);
+            this.Controls.Add(this.saveEndPointsCheckBox);
+            this.Controls.Add(this.heuristicTextBox);
+            this.Controls.Add(this.heuristicLabel);
             this.Controls.Add(this.yNodeSizeLabel);
             this.Controls.Add(this.xNodeSizeLabel);
             this.Controls.Add(this.yNodeSizeTextBox);
@@ -182,6 +214,9 @@ namespace AStarSimDisplay
         private System.Windows.Forms.TextBox yNodeSizeTextBox;
         private System.Windows.Forms.Label xNodeSizeLabel;
         private System.Windows.Forms.Label yNodeSizeLabel;
+        private System.Windows.Forms.Label heuristicLabel;
+        private System.Windows.Forms.TextBox heuristicTextBox;
+        private System.Windows.Forms.CheckBox saveEndPointsCheckBox;
     }
 }
 

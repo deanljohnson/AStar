@@ -6,7 +6,7 @@ using PriorityQueue;
 
 namespace AStar
 {
-    public class AStar<T> where T : IEquatable<T>
+    public class AStar<T> : IPathFinder<T> where T : IEquatable<T>
     {
         /// <summary>
         /// A function that returns the neighbors of a given node.
@@ -20,11 +20,13 @@ namespace AStar
 
         private Dictionary<T, T> m_Parents { get; set; }
         private Dictionary<T, double> m_GValues { get; set; }
+
         //We keep Closed and Open public for demo purposes
         public HashSet<T> Closed { get; private set; }
         public PriorityQueue<T, double> Open { get; private set; }
         // ReSharper disable once StaticMemberInGenericType
         public double HeuristicScale { get; set; }
+        public IAStarListener<T> Listener { get; set; }
 
         public AStar(Func<T, IList<T>> getNeighbors, Func<T, T, double> distanceFunc, double heuristic = 1.0)
         {
@@ -58,27 +60,41 @@ namespace AStar
                 }
 
                 Closed.Add(currentNode);
+                Listener?.SetClosed(currentNode);
 
                 var neighbors = CallGetNeighbors(currentNode);
-                foreach (var i in neighbors)
+                foreach (var neighbor in neighbors)
                 {
-                    if (Closed.Contains(i))
+                    if (Closed.Contains(neighbor))
                         continue;
 
-                    var currentG = m_GValues[currentNode] + m_DistanceFunc(currentNode, i);
-                    var potentialF = currentG + (m_DistanceFunc(i, end) * HeuristicScale);
+                    var neighborG = m_GValues[currentNode] + m_DistanceFunc(currentNode, neighbor);
+                    var potentialF = neighborG + (m_DistanceFunc(neighbor, end) * HeuristicScale);
 
-                    if (!Open.Contains(i))
+                    if (!Open.Contains(neighbor))
                     {
-                        SetParent(i, currentNode);
-                        m_GValues[i] = currentG;
-                        Open.Enqueue(i, potentialF);
+                        SetParent(neighbor, currentNode);
+                        m_GValues[neighbor] = neighborG;
+                        Open.Enqueue(neighbor, potentialF);
+
+                        if (Listener == null) continue;
+
+                        Listener.SetOpen(neighbor);
+                        Listener.SetParent(neighbor, currentNode);
+                        Listener.SetGValue(neighbor, neighborG);
+                        Listener.SetFValue(neighbor, potentialF);
                     }
-                    else if (potentialF < Open.GetPriority(i))
+                    else if (potentialF < Open.GetPriority(neighbor))
                     {
-                        SetParent(i, currentNode);
-                        m_GValues[i] = currentG;
-                        Open.SetPriority(i, potentialF);
+                        SetParent(neighbor, currentNode);
+                        m_GValues[neighbor] = neighborG;
+                        Open.SetPriority(neighbor, potentialF);
+
+                        if (Listener == null) continue;
+
+                        Listener.SetParent(neighbor, currentNode);
+                        Listener.SetGValue(neighbor, neighborG);
+                        Listener.SetFValue(neighbor, potentialF);
                     }
                 }
             }
@@ -107,6 +123,7 @@ namespace AStar
             }
 
             Closed.Add(currentNode);
+            Listener?.SetClosed(currentNode);
 
             var neighbors = CallGetNeighbors(currentNode);
             foreach (var neighbor in neighbors)
@@ -122,12 +139,25 @@ namespace AStar
                     SetParent(neighbor, currentNode);
                     m_GValues[neighbor] = neighborG;
                     Open.Enqueue(neighbor, potentialF);
+
+                    if (Listener == null) continue;
+
+                    Listener.SetOpen(neighbor);
+                    Listener.SetParent(neighbor, currentNode);
+                    Listener.SetGValue(neighbor, neighborG);
+                    Listener.SetFValue(neighbor, potentialF);
                 }
                 else if (potentialF < Open.GetPriority(neighbor))
                 {
                     SetParent(neighbor, currentNode);
                     m_GValues[neighbor] = neighborG;
                     Open.SetPriority(neighbor, potentialF);
+
+                    if (Listener == null) continue;
+
+                    Listener.SetParent(neighbor, currentNode);
+                    Listener.SetGValue(neighbor, neighborG);
+                    Listener.SetFValue(neighbor, potentialF);
                 }
             }
 
@@ -142,6 +172,8 @@ namespace AStar
 
             m_GValues = new Dictionary<T, double> { { start, 0.0 }, { end, 0.0 } };
             m_Parents = new Dictionary<T, T>();
+
+            Listener?.Reset();
         }
 
         /// <summary>

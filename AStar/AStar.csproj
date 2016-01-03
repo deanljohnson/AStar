@@ -49,6 +49,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AStar.cs" />
+    <Compile Include="IAStarListener.cs" />
+    <Compile Include="IPathFinder.cs" />
+    <Compile Include="IPathFindingListener.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="libs\PriorityQueue.dll" />

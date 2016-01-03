@@ -13,7 +13,7 @@ namespace AStarSimulation
 {
     public class Simulation
     {
-        private readonly Dictionary<CellState, Color> m_StateToColorMap = new Dictionary<CellState, Color>
+        private static readonly Dictionary<CellState, Color> StateToColorMap = new Dictionary<CellState, Color>
         {
             {CellState.None, Color.Black},
             {CellState.Open, Color.Yellow},
@@ -25,20 +25,24 @@ namespace AStarSimulation
         }; 
 
         private readonly Stopwatch m_Stopwatch = new Stopwatch();
-        private PathfindingData m_Data;
 
         private readonly RenderWindow m_Window;
 
         private IIndexedPathfindingMap m_Grid;
         private const double WALL_DENSITY = .95;
-        private AStar<Vector2i> m_AStar;
+        private IPathFinder<Vector2i> m_PathFinder;
+        private IPathFindingListener<Vector2i> m_PathFindingListener; 
         private Vector2i m_Start;
         private Vector2i m_End;
         private PathfindingGraphState m_GraphState;
         private SimulationAction m_SimulationAction;
         private GridType m_GridType;
         private Vector2i m_NodeSize;
+        private double m_Heuristic;
 
+        /// <summary>
+        /// The size of the nodes currently in use by the Simulation
+        /// </summary>
         public Vector2i NodeSize {
             get { return m_NodeSize; }
             set
@@ -53,6 +57,9 @@ namespace AStarSimulation
             }
         }
 
+        /// <summary>
+        /// The GridType currently in use by the Simulation
+        /// </summary>
         public GridType GridType
         {
             get { return m_GridType; }
@@ -65,6 +72,9 @@ namespace AStarSimulation
             }
         }
 
+        /// <summary>
+        /// The SimulationAction to run at the next call to Update
+        /// </summary>
         public SimulationAction SimulationAction
         {
             get { return m_SimulationAction; }
@@ -74,6 +84,22 @@ namespace AStarSimulation
                 SwitchSimulationAction(value);
             }
         }
+
+        /// <summary>
+        /// A scaling factor to be applied to distance 
+        /// estimates during the pathfinding process.
+        /// </summary>
+        public double Heuristic {
+            get { return m_Heuristic; }
+            set
+            {
+                m_Heuristic = value;
+                ResetGraph();
+            }
+        }
+
+        public bool SaveEndPoints { get; set; }
+        public PathfindingData Data { get; set; } = new PathfindingData();
 
         public Simulation(RenderWindow window, GridType gridType, Vector2i nodeSize)
         {
@@ -115,6 +141,9 @@ namespace AStarSimulation
             m_Window.Draw(m_Grid);
         }
 
+        /// <summary>
+        /// Rebuilds the graph based on the current GridType
+        /// </summary>
         private void RebuildGraph()
         {
             switch (m_GridType)
@@ -132,6 +161,29 @@ namespace AStarSimulation
             }
         }
 
+        private IIndexedPathfindingMap BuildSquareGrid(Vector2i nodeSize)
+        {
+            var gridSize = new Vector2i((int)(m_Window.Size.X / nodeSize.X), (int)(m_Window.Size.Y / nodeSize.Y));
+            return new SquareGrid(nodeSize, gridSize, StateToColorMap);
+        }
+
+        private IIndexedPathfindingMap BuildHexGrid(Vector2i hexSize)
+        {
+            var floatHexSize = new Vector2f(hexSize.X, hexSize.Y);
+            var testHex = new HexShape(new Layout(Orientation.Flat, floatHexSize, new Vector2f(0, 0)));
+            var size = new Vector2f(testHex.GetLocalBounds().Width, testHex.GetLocalBounds().Height);
+            //We subtract one to handle the center hex
+            var vertRadius = m_Window.Size.Y / (2f * size.Y) - 1;
+            var horizRadius = m_Window.Size.X / (2f * size.X) - 1;
+
+            return new HexGrid((int)Math.Min(vertRadius, horizRadius), Orientation.Flat, floatHexSize, StateToColorMap)
+            { Position = new Vector2f(m_Window.Size.X / 2f, m_Window.Size.Y / 2f) };
+        }
+
+        /// <summary>
+        /// Switches to the given SimulationAction, or resets the graph 
+        /// if it is in a state that cannot run the specified SimulationAction
+        /// </summary>
         private void SwitchSimulationAction(SimulationAction newAction)
         {
             m_SimulationAction = SimulationAction.None;
@@ -163,10 +215,13 @@ namespace AStarSimulation
             }
         }
 
+        /// <summary>
+        /// Finds a path from start to end on the graph
+        /// </summary>
         private void FullRunOnce()
         {
             m_Stopwatch.Start();
-            var path = m_AStar.PathFind(m_Start, m_End);
+            var path = m_PathFinder.PathFind(m_Start, m_End);
             m_Stopwatch.Stop();
 
             if (path == null)
@@ -177,10 +232,13 @@ namespace AStarSimulation
             ReportPathFinished(path);
         }
 
+        /// <summary>
+        /// Runs a single step of the pathfinding process
+        /// </summary>
         private void RunOneStep()
         {
             m_Stopwatch.Start();
-            var path = m_AStar.PathFindOneStep(m_Start, m_End);
+            var path = m_PathFinder.PathFindOneStep(m_Start, m_End);
             m_Stopwatch.Stop();
 
             if (path != null)
@@ -194,6 +252,10 @@ namespace AStarSimulation
             }
         }
 
+        /// <summary>
+        /// Performs any necessary cleanup at the end of pathfinding and 
+        /// populates the member PathFindingData instance with relevant data
+        /// </summary>
         private void ReportPathFinished(Stack<Vector2i> path)
         {
             m_GraphState = PathfindingGraphState.Finished;
@@ -201,25 +263,27 @@ namespace AStarSimulation
             m_Stopwatch.Reset();
 
             var pathLength = path.Count;
-            var nodesVisited = m_AStar.Open.Count + m_AStar.Closed.Count;
+            var nodesVisited = m_PathFindingListener.Open.Count + m_PathFindingListener.Closed.Count;
 
             ColorGridFromPathData(path);
 
-            m_Data.HeuristicUsed = m_AStar.HeuristicScale;
-            m_Data.GraphSize = m_Grid.Count;
-            m_Data.PathfindingTime = pathFindingTime;
-            m_Data.TotalPathfindingTime += pathFindingTime;
-            m_Data.PathLength = pathLength;
-            m_Data.NodesVisited = nodesVisited;
-            m_Data.TotalNodesVisited += nodesVisited;
-            m_Data.PathsComputed++;
-            m_Data.OutputData();
+            Data.GraphSize = m_Grid.Count;
+            Data.PathfindingTime = pathFindingTime;
+            Data.TotalPathfindingTime += pathFindingTime;
+            Data.PathLength = pathLength;
+            Data.NodesVisited = nodesVisited;
+            Data.TotalNodesVisited += nodesVisited;
+            Data.PathsComputed++;
+            Data.OutputDataToConsole();
         }
 
+        /// <summary>
+        /// Sets the colors on the grid to correspond with their CellState
+        /// </summary>
         private void ColorGridFromPathData(Stack<Vector2i> path)
         {
-            m_Grid.Set(m_AStar.Open, CellState.Open);
-            m_Grid.Set(m_AStar.Closed, CellState.Closed);
+            m_Grid.Set(m_PathFindingListener.Open, CellState.Open);
+            m_Grid.Set(m_PathFindingListener.Closed, CellState.Closed);
 
             //We have to run this check because step-by-step solving might pass a null path
             if (path != null)
@@ -231,19 +295,55 @@ namespace AStarSimulation
             m_Grid.Set(m_End, CellState.End);
         }
 
+        /// <summary>
+        /// Resets the graph and the AStar instance so that pathfinding can be run again
+        /// </summary>
         private void ResetGraph()
         {
-            m_AStar = new AStar<Vector2i>(m_Grid.NeighborsOfCell, m_Grid.DistanceEstimate);
+            var aStarListener = m_PathFindingListener as IAStarListener<Vector2i>;
+            if (aStarListener != null)
+            {
+                aStarListener.Reset();
+                m_PathFinder = new AStar<Vector2i>(m_Grid.NeighborsOfCell, m_Grid.DistanceEstimate, Heuristic)
+                {
+                    Listener = aStarListener
+                };
+            }
+            else
+            {
+                m_PathFindingListener = new AStarListener();
+                m_PathFinder = new AStar<Vector2i>(m_Grid.NeighborsOfCell, m_Grid.DistanceEstimate, Heuristic)
+                {
+                    Listener = (IAStarListener<Vector2i>)m_PathFindingListener
+                };
+            }
+            
+            
             ResetNodes();
-            SetStartAndEnd();
+            if (!SaveEndPoints)
+            {
+                SetStartAndEnd();
+            }
+            else
+            {
+                //The call to ResetNodes set everything the CellState.None, so we must reset these
+                m_Grid.Set(m_Start, CellState.Start);
+                m_Grid.Set(m_End, CellState.End);
+            }
             m_GraphState = PathfindingGraphState.Ready;
         }
 
+        /// <summary>
+        /// Resets all nodes in the graph to CellState.None
+        /// </summary>
         private void ResetNodes()
         {
             m_Grid.SetAll(CellState.None);
         }
 
+        /// <summary>
+        /// Sets the start and end node on the Graph, guarenteeing they are not the same node.
+        /// </summary>
         private void SetStartAndEnd()
         {
             do
@@ -255,25 +355,6 @@ namespace AStarSimulation
 
             m_Grid.Set(m_Start, CellState.Start);
             m_Grid.Set(m_End, CellState.End);
-        }
-
-        private IIndexedPathfindingMap BuildSquareGrid(Vector2i nodeSize)
-        {
-            var gridSize = new Vector2i((int) (m_Window.Size.X/nodeSize.X), (int) (m_Window.Size.Y/nodeSize.Y));
-            return new SquareGrid(nodeSize, gridSize, m_StateToColorMap);
-        }
-
-        private IIndexedPathfindingMap BuildHexGrid(Vector2i hexSize)
-        {
-            var floatHexSize = new Vector2f(hexSize.X, hexSize.Y);
-            var testHex = new HexShape(new Layout(Orientation.Flat, floatHexSize, new Vector2f(0, 0)));
-            var size = new Vector2f(testHex.GetLocalBounds().Width, testHex.GetLocalBounds().Height);
-            //We subtract one to handle the center hex
-            var vertRadius = m_Window.Size.Y/(2f*size.Y) - 1;
-            var horizRadius = m_Window.Size.X/(2f*size.X) - 1;
-             
-            return new HexGrid((int) Math.Min(vertRadius, horizRadius), Orientation.Flat, floatHexSize, m_StateToColorMap)
-            { Position = new Vector2f(m_Window.Size.X / 2f, m_Window.Size.Y / 2f) };
         }
 
         //Kept here for future reference for when I revisit the idea of automatic obstacles
