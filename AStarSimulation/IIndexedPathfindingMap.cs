@@ -53,5 +53,12 @@ namespace AStarSimulation
         /// <param name="current"></param>
         /// <returns></returns>
         List<Vector2i> NeighborsOfCell(Vector2i current);
+
+        /// <summary>
+        /// Returns the cells in a "line" from a to b. What exactly a line is can vary
+        /// by the type of grid, but it can generally be thought of as the straightest
+        ///  between two points.
+        /// </summary>
+        List<Vector2i> CellsInLine(Vector2i a, Vector2i b);
     }
 }

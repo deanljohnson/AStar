@@ -17,6 +17,7 @@ namespace AStarSimDisplay
         }; 
 
         public Simulation Simulation { get; set; }
+        public PathfindingDataDisplay DataDisplay { get; set; }
 
         public MainForm()
         {
@@ -36,6 +37,12 @@ namespace AStarSimDisplay
             };
         }
 
+        public void InitializeDataDisplay()
+        {
+            DataDisplay = Controls.Find("dataDisplay", false)[0] as PathfindingDataDisplay;
+            DataDisplay?.SetData(Simulation.Data);
+        }
+
         private void MainForm_Load(object sender, EventArgs e)
         {
             foreach (var gridTypePair in m_GridTypeMap)
@@ -44,6 +51,8 @@ namespace AStarSimDisplay
             }
 
             gridTypeComboBox.SelectedIndex = 0;
+
+            algorithmComboBox.SelectedIndex = 0;
         }
 
         private void gridTypeComboBox_SelectedIndexChanged(object sender, EventArgs e)
@@ -129,6 +138,11 @@ namespace AStarSimDisplay
         private void saveEndPointsCheckBox_CheckedChanged(object sender, EventArgs e)
         {
             Simulation.SaveEndPoints = saveEndPointsCheckBox.Checked;
+        }
+
+        private void generateWallsCheckbox_CheckedChanged(object sender, EventArgs e)
+        {
+            Simulation.GenerateWalls = generateWallsCheckbox.Checked;
         }
     }
 }

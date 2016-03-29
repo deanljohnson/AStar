@@ -96,5 +96,12 @@ namespace AStarSimulation.Grids.Hexagon
 
             return neighbors;
         }
+
+        public List<Vector2i> CellsInLine(Vector2i a, Vector2i b)
+        {
+            var hexes = GetHexesInLine(new Hex(a.X, a.Y), new Hex(b.X, b.Y));
+
+            return new List<Vector2i>(hexes.Select(h => new Vector2i(h.X, h.Y)));
+        }
     }
 }

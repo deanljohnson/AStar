@@ -16,6 +16,9 @@ namespace AStarSimulation
         {
             Open.Clear();
             Closed.Clear();
+            GValues.Clear();
+            FValues.Clear();
+            Parents.Clear();
         }
 
         public void SetOpen(Vector2i cell)

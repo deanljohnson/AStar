@@ -29,7 +29,6 @@ namespace AStarSimulation
         private readonly RenderWindow m_Window;
 
         private IIndexedPathfindingMap m_Grid;
-        private const double WALL_DENSITY = .95;
         private IPathFinder<Vector2i> m_PathFinder;
         private IPathFindingListener<Vector2i> m_PathFindingListener; 
         private Vector2i m_Start;
@@ -99,6 +98,7 @@ namespace AStarSimulation
         }
 
         public bool SaveEndPoints { get; set; }
+        public bool GenerateWalls { get; set; }
         public PathfindingData Data { get; set; } = new PathfindingData();
 
         public Simulation(RenderWindow window, GridType gridType, Vector2i nodeSize)
@@ -259,7 +259,7 @@ namespace AStarSimulation
         private void ReportPathFinished(Stack<Vector2i> path)
         {
             m_GraphState = PathfindingGraphState.Finished;
-            var pathFindingTime = m_Stopwatch.ElapsedMilliseconds;
+            var pathFindingTime = m_Stopwatch.Elapsed;
             m_Stopwatch.Reset();
 
             var pathLength = path.Count;
@@ -273,8 +273,7 @@ namespace AStarSimulation
             Data.PathLength = pathLength;
             Data.NodesVisited = nodesVisited;
             Data.TotalNodesVisited += nodesVisited;
-            Data.PathsComputed++;
-            Data.OutputDataToConsole();
+            Data.TotalPathsComputed++;
         }
 
         /// <summary>
@@ -320,6 +319,12 @@ namespace AStarSimulation
             
             
             ResetNodes();
+
+            if (GenerateWalls)
+            {
+                GenerateRandomWalls();
+            }
+
             if (!SaveEndPoints)
             {
                 SetStartAndEnd();
@@ -339,6 +344,15 @@ namespace AStarSimulation
         private void ResetNodes()
         {
             m_Grid.SetAll(CellState.None);
+        }
+
+        /// <summary>
+        /// Generates random walls on the grid
+        /// </summary>
+        private void GenerateRandomWalls(int count = 5)
+        {
+            IWallGenerator gen = new StraightWallGenerator();
+            gen.GenerateWalls(m_Grid, count);
         }
 
         /// <summary>

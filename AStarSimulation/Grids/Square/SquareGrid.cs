@@ -115,6 +115,30 @@ namespace AStarSimulation.Grids.Square
             return neighbors;
         }
 
+        public List<Vector2i> CellsInLine(Vector2i a, Vector2i b)
+        {
+            var dif = b - a;
+            var difNormalized = Utils.Normalize(new Vector2f(dif.X, dif.Y));
+            var length = Utils.Length(new Vector2f(dif.X, dif.Y));
+            var interPointsCount = (int) length + 1;
+            var cells = new HashSet<Vector2i> {a};
+
+            var floatA = new Vector2f(a.X, a.Y);
+            for (var i = 1; i <= interPointsCount; i++)
+            {
+                var floatPoint = floatA + (difNormalized * i);
+                var point = new Vector2i((int) Math.Round(floatPoint.X), (int) Math.Round(floatPoint.Y));
+
+                if (point.X > 0 && point.X < GridSize.X && point.Y > 0 && point.Y < GridSize.Y)
+                {
+                    cells.Add(point);
+                }
+            }
+
+            cells.Add(b);
+            return new List<Vector2i>(cells);
+        }
+
         private bool OnTop(Vector2i index)
         {
             return index.Y == 0;

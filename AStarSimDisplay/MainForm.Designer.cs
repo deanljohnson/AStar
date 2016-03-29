@@ -43,23 +43,28 @@ namespace AStarSimDisplay
             this.yNodeSizeLabel = new System.Windows.Forms.Label();
             this.heuristicLabel = new System.Windows.Forms.Label();
             this.heuristicTextBox = new System.Windows.Forms.TextBox();
-            this.SFMLDrawingSurface = new AStarSimDisplay.SFMLDrawingSurface();
             this.saveEndPointsCheckBox = new System.Windows.Forms.CheckBox();
+            this.algorithmLabel = new System.Windows.Forms.Label();
+            this.algorithmComboBox = new System.Windows.Forms.ComboBox();
+            this.dataDisplay = new AStarSimDisplay.PathfindingDataDisplay();
+            this.SFMLDrawingSurface = new AStarSimDisplay.SFMLDrawingSurface();
+            this.generateWallsCheckbox = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // gridTypeComboBox
             // 
+            this.gridTypeComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.gridTypeComboBox.FormattingEnabled = true;
-            this.gridTypeComboBox.Location = new System.Drawing.Point(12, 163);
+            this.gridTypeComboBox.Location = new System.Drawing.Point(30, 163);
             this.gridTypeComboBox.Name = "gridTypeComboBox";
-            this.gridTypeComboBox.Size = new System.Drawing.Size(111, 21);
+            this.gridTypeComboBox.Size = new System.Drawing.Size(105, 21);
             this.gridTypeComboBox.TabIndex = 1;
             this.gridTypeComboBox.SelectedIndexChanged += new System.EventHandler(this.gridTypeComboBox_SelectedIndexChanged);
             // 
             // gridTypeLabel
             // 
             this.gridTypeLabel.AutoSize = true;
-            this.gridTypeLabel.Location = new System.Drawing.Point(12, 147);
+            this.gridTypeLabel.Location = new System.Drawing.Point(21, 147);
             this.gridTypeLabel.Name = "gridTypeLabel";
             this.gridTypeLabel.Size = new System.Drawing.Size(53, 13);
             this.gridTypeLabel.TabIndex = 2;
@@ -67,7 +72,7 @@ namespace AStarSimDisplay
             // 
             // toggleContinuousButton
             // 
-            this.toggleContinuousButton.Location = new System.Drawing.Point(12, 12);
+            this.toggleContinuousButton.Location = new System.Drawing.Point(24, 12);
             this.toggleContinuousButton.Name = "toggleContinuousButton";
             this.toggleContinuousButton.Size = new System.Drawing.Size(111, 23);
             this.toggleContinuousButton.TabIndex = 3;
@@ -77,7 +82,7 @@ namespace AStarSimDisplay
             // 
             // runOnceButton
             // 
-            this.runOnceButton.Location = new System.Drawing.Point(12, 41);
+            this.runOnceButton.Location = new System.Drawing.Point(24, 41);
             this.runOnceButton.Name = "runOnceButton";
             this.runOnceButton.Size = new System.Drawing.Size(111, 23);
             this.runOnceButton.TabIndex = 4;
@@ -87,7 +92,7 @@ namespace AStarSimDisplay
             // 
             // runOneStepButton
             // 
-            this.runOneStepButton.Location = new System.Drawing.Point(12, 70);
+            this.runOneStepButton.Location = new System.Drawing.Point(24, 70);
             this.runOneStepButton.Name = "runOneStepButton";
             this.runOneStepButton.Size = new System.Drawing.Size(111, 23);
             this.runOneStepButton.TabIndex = 5;
@@ -98,7 +103,7 @@ namespace AStarSimDisplay
             // nodeSizeLabel
             // 
             this.nodeSizeLabel.AutoSize = true;
-            this.nodeSizeLabel.Location = new System.Drawing.Point(12, 187);
+            this.nodeSizeLabel.Location = new System.Drawing.Point(21, 187);
             this.nodeSizeLabel.Name = "nodeSizeLabel";
             this.nodeSizeLabel.Size = new System.Drawing.Size(56, 13);
             this.nodeSizeLabel.TabIndex = 6;
@@ -106,7 +111,7 @@ namespace AStarSimDisplay
             // 
             // xNodeSizeTextBox
             // 
-            this.xNodeSizeTextBox.Location = new System.Drawing.Point(41, 203);
+            this.xNodeSizeTextBox.Location = new System.Drawing.Point(53, 203);
             this.xNodeSizeTextBox.Name = "xNodeSizeTextBox";
             this.xNodeSizeTextBox.Size = new System.Drawing.Size(82, 20);
             this.xNodeSizeTextBox.TabIndex = 7;
@@ -114,7 +119,7 @@ namespace AStarSimDisplay
             // 
             // yNodeSizeTextBox
             // 
-            this.yNodeSizeTextBox.Location = new System.Drawing.Point(41, 229);
+            this.yNodeSizeTextBox.Location = new System.Drawing.Point(53, 229);
             this.yNodeSizeTextBox.Name = "yNodeSizeTextBox";
             this.yNodeSizeTextBox.Size = new System.Drawing.Size(82, 20);
             this.yNodeSizeTextBox.TabIndex = 8;
@@ -123,7 +128,7 @@ namespace AStarSimDisplay
             // xNodeSizeLabel
             // 
             this.xNodeSizeLabel.AutoSize = true;
-            this.xNodeSizeLabel.Location = new System.Drawing.Point(21, 206);
+            this.xNodeSizeLabel.Location = new System.Drawing.Point(33, 206);
             this.xNodeSizeLabel.Name = "xNodeSizeLabel";
             this.xNodeSizeLabel.Size = new System.Drawing.Size(14, 13);
             this.xNodeSizeLabel.TabIndex = 9;
@@ -132,7 +137,7 @@ namespace AStarSimDisplay
             // yNodeSizeLabel
             // 
             this.yNodeSizeLabel.AutoSize = true;
-            this.yNodeSizeLabel.Location = new System.Drawing.Point(21, 232);
+            this.yNodeSizeLabel.Location = new System.Drawing.Point(33, 232);
             this.yNodeSizeLabel.Name = "yNodeSizeLabel";
             this.yNodeSizeLabel.Size = new System.Drawing.Size(14, 13);
             this.yNodeSizeLabel.TabIndex = 10;
@@ -141,7 +146,7 @@ namespace AStarSimDisplay
             // heuristicLabel
             // 
             this.heuristicLabel.AutoSize = true;
-            this.heuristicLabel.Location = new System.Drawing.Point(12, 252);
+            this.heuristicLabel.Location = new System.Drawing.Point(21, 252);
             this.heuristicLabel.Name = "heuristicLabel";
             this.heuristicLabel.Size = new System.Drawing.Size(48, 13);
             this.heuristicLabel.TabIndex = 11;
@@ -149,23 +154,16 @@ namespace AStarSimDisplay
             // 
             // heuristicTextBox
             // 
-            this.heuristicTextBox.Location = new System.Drawing.Point(12, 268);
+            this.heuristicTextBox.Location = new System.Drawing.Point(30, 268);
             this.heuristicTextBox.Name = "heuristicTextBox";
-            this.heuristicTextBox.Size = new System.Drawing.Size(100, 20);
+            this.heuristicTextBox.Size = new System.Drawing.Size(105, 20);
             this.heuristicTextBox.TabIndex = 12;
             this.heuristicTextBox.Text = "1";
-            // 
-            // SFMLDrawingSurface
-            // 
-            this.SFMLDrawingSurface.Location = new System.Drawing.Point(129, 12);
-            this.SFMLDrawingSurface.Name = "SFMLDrawingSurface";
-            this.SFMLDrawingSurface.Size = new System.Drawing.Size(1443, 837);
-            this.SFMLDrawingSurface.TabIndex = 0;
             // 
             // saveEndPointsCheckBox
             // 
             this.saveEndPointsCheckBox.AutoSize = true;
-            this.saveEndPointsCheckBox.Location = new System.Drawing.Point(12, 294);
+            this.saveEndPointsCheckBox.Location = new System.Drawing.Point(24, 294);
             this.saveEndPointsCheckBox.Name = "saveEndPointsCheckBox";
             this.saveEndPointsCheckBox.Size = new System.Drawing.Size(105, 17);
             this.saveEndPointsCheckBox.TabIndex = 13;
@@ -173,11 +171,60 @@ namespace AStarSimDisplay
             this.saveEndPointsCheckBox.UseVisualStyleBackColor = true;
             this.saveEndPointsCheckBox.CheckedChanged += new System.EventHandler(this.saveEndPointsCheckBox_CheckedChanged);
             // 
+            // algorithmLabel
+            // 
+            this.algorithmLabel.AutoSize = true;
+            this.algorithmLabel.Location = new System.Drawing.Point(21, 107);
+            this.algorithmLabel.Name = "algorithmLabel";
+            this.algorithmLabel.Size = new System.Drawing.Size(50, 13);
+            this.algorithmLabel.TabIndex = 15;
+            this.algorithmLabel.Text = "Algorithm";
+            // 
+            // algorithmComboBox
+            // 
+            this.algorithmComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.algorithmComboBox.FormattingEnabled = true;
+            this.algorithmComboBox.Items.AddRange(new object[] {
+            "A*"});
+            this.algorithmComboBox.Location = new System.Drawing.Point(30, 123);
+            this.algorithmComboBox.Name = "algorithmComboBox";
+            this.algorithmComboBox.Size = new System.Drawing.Size(105, 21);
+            this.algorithmComboBox.TabIndex = 16;
+            // 
+            // dataDisplay
+            // 
+            this.dataDisplay.Location = new System.Drawing.Point(12, 525);
+            this.dataDisplay.Name = "dataDisplay";
+            this.dataDisplay.Size = new System.Drawing.Size(177, 313);
+            this.dataDisplay.TabIndex = 14;
+            // 
+            // SFMLDrawingSurface
+            // 
+            this.SFMLDrawingSurface.Location = new System.Drawing.Point(195, 12);
+            this.SFMLDrawingSurface.Name = "SFMLDrawingSurface";
+            this.SFMLDrawingSurface.Size = new System.Drawing.Size(1377, 837);
+            this.SFMLDrawingSurface.TabIndex = 0;
+            // 
+            // generateWallsCheckbox
+            // 
+            this.generateWallsCheckbox.AutoSize = true;
+            this.generateWallsCheckbox.Location = new System.Drawing.Point(24, 317);
+            this.generateWallsCheckbox.Name = "generateWallsCheckbox";
+            this.generateWallsCheckbox.Size = new System.Drawing.Size(99, 17);
+            this.generateWallsCheckbox.TabIndex = 17;
+            this.generateWallsCheckbox.Text = "Generate Walls";
+            this.generateWallsCheckbox.UseVisualStyleBackColor = true;
+            this.generateWallsCheckbox.CheckedChanged += new System.EventHandler(this.generateWallsCheckbox_CheckedChanged);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1584, 861);
+            this.ClientSize = new System.Drawing.Size(1584, 850);
+            this.Controls.Add(this.generateWallsCheckbox);
+            this.Controls.Add(this.algorithmComboBox);
+            this.Controls.Add(this.algorithmLabel);
+            this.Controls.Add(this.dataDisplay);
             this.Controls.Add(this.saveEndPointsCheckBox);
             this.Controls.Add(this.heuristicTextBox);
             this.Controls.Add(this.heuristicLabel);
@@ -217,6 +264,10 @@ namespace AStarSimDisplay
         private System.Windows.Forms.Label heuristicLabel;
         private System.Windows.Forms.TextBox heuristicTextBox;
         private System.Windows.Forms.CheckBox saveEndPointsCheckBox;
+        private PathfindingDataDisplay dataDisplay;
+        private System.Windows.Forms.Label algorithmLabel;
+        private System.Windows.Forms.ComboBox algorithmComboBox;
+        private System.Windows.Forms.CheckBox generateWallsCheckbox;
     }
 }
 
