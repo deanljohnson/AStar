@@ -46,9 +46,9 @@ namespace AStarSimDisplay
             this.saveEndPointsCheckBox = new System.Windows.Forms.CheckBox();
             this.algorithmLabel = new System.Windows.Forms.Label();
             this.algorithmComboBox = new System.Windows.Forms.ComboBox();
+            this.generateWallsCheckbox = new System.Windows.Forms.CheckBox();
             this.dataDisplay = new AStarSimDisplay.PathfindingDataDisplay();
             this.SFMLDrawingSurface = new AStarSimDisplay.SFMLDrawingSurface();
-            this.generateWallsCheckbox = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // gridTypeComboBox
@@ -184,12 +184,22 @@ namespace AStarSimDisplay
             // 
             this.algorithmComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.algorithmComboBox.FormattingEnabled = true;
-            this.algorithmComboBox.Items.AddRange(new object[] {
-            "A*"});
             this.algorithmComboBox.Location = new System.Drawing.Point(30, 123);
             this.algorithmComboBox.Name = "algorithmComboBox";
             this.algorithmComboBox.Size = new System.Drawing.Size(105, 21);
             this.algorithmComboBox.TabIndex = 16;
+            this.algorithmComboBox.SelectedIndexChanged += new System.EventHandler(this.algorithmComboBox_SelectedIndexChanged);
+            // 
+            // generateWallsCheckbox
+            // 
+            this.generateWallsCheckbox.AutoSize = true;
+            this.generateWallsCheckbox.Location = new System.Drawing.Point(24, 317);
+            this.generateWallsCheckbox.Name = "generateWallsCheckbox";
+            this.generateWallsCheckbox.Size = new System.Drawing.Size(99, 17);
+            this.generateWallsCheckbox.TabIndex = 17;
+            this.generateWallsCheckbox.Text = "Generate Walls";
+            this.generateWallsCheckbox.UseVisualStyleBackColor = true;
+            this.generateWallsCheckbox.CheckedChanged += new System.EventHandler(this.generateWallsCheckbox_CheckedChanged);
             // 
             // dataDisplay
             // 
@@ -204,17 +214,6 @@ namespace AStarSimDisplay
             this.SFMLDrawingSurface.Name = "SFMLDrawingSurface";
             this.SFMLDrawingSurface.Size = new System.Drawing.Size(1377, 837);
             this.SFMLDrawingSurface.TabIndex = 0;
-            // 
-            // generateWallsCheckbox
-            // 
-            this.generateWallsCheckbox.AutoSize = true;
-            this.generateWallsCheckbox.Location = new System.Drawing.Point(24, 317);
-            this.generateWallsCheckbox.Name = "generateWallsCheckbox";
-            this.generateWallsCheckbox.Size = new System.Drawing.Size(99, 17);
-            this.generateWallsCheckbox.TabIndex = 17;
-            this.generateWallsCheckbox.Text = "Generate Walls";
-            this.generateWallsCheckbox.UseVisualStyleBackColor = true;
-            this.generateWallsCheckbox.CheckedChanged += new System.EventHandler(this.generateWallsCheckbox_CheckedChanged);
             // 
             // MainForm
             // 

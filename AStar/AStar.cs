@@ -20,10 +20,9 @@ namespace AStar
 
         private Dictionary<T, T> m_Parents { get; set; }
         private Dictionary<T, double> m_GValues { get; set; }
+        private HashSet<T> m_Closed { get; set; }
+        private PriorityQueue<T, double> m_Open { get; set; }
 
-        //We keep Closed and Open public for demo purposes
-        public HashSet<T> Closed { get; private set; }
-        public PriorityQueue<T, double> Open { get; private set; }
         // ReSharper disable once StaticMemberInGenericType
         public double HeuristicScale { get; set; }
         public IAStarListener<T> Listener { get; set; }
@@ -48,34 +47,35 @@ namespace AStar
             }
 
             InitializeCollections(start, end);
+            Listener?.Reset();
 
-            while (Open.Any())
+            while (m_Open.Any())
             {
                 //Take the most promising node
-                var currentNode = Open.Dequeue();
+                var currentNode = m_Open.Dequeue();
 
                 if (currentNode == null || currentNode.Equals(end))
                 {
                     return ConstructBestPath(start, end);
                 }
 
-                Closed.Add(currentNode);
+                m_Closed.Add(currentNode);
                 Listener?.SetClosed(currentNode);
 
                 var neighbors = CallGetNeighbors(currentNode);
                 foreach (var neighbor in neighbors)
                 {
-                    if (Closed.Contains(neighbor))
+                    if (m_Closed.Contains(neighbor))
                         continue;
 
                     var neighborG = m_GValues[currentNode] + m_DistanceFunc(currentNode, neighbor);
                     var potentialF = neighborG + (m_DistanceFunc(neighbor, end) * HeuristicScale);
 
-                    if (!Open.Contains(neighbor))
+                    if (!m_Open.Contains(neighbor))
                     {
                         SetParent(neighbor, currentNode);
                         m_GValues[neighbor] = neighborG;
-                        Open.Enqueue(neighbor, potentialF);
+                        m_Open.Enqueue(neighbor, potentialF);
 
                         if (Listener == null) continue;
 
@@ -84,11 +84,11 @@ namespace AStar
                         Listener.SetGValue(neighbor, neighborG);
                         Listener.SetFValue(neighbor, potentialF);
                     }
-                    else if (potentialF < Open.GetPriority(neighbor))
+                    else if (potentialF < m_Open.GetPriority(neighbor))
                     {
                         SetParent(neighbor, currentNode);
                         m_GValues[neighbor] = neighborG;
-                        Open.SetPriority(neighbor, potentialF);
+                        m_Open.SetPriority(neighbor, potentialF);
 
                         if (Listener == null) continue;
 
@@ -107,38 +107,39 @@ namespace AStar
         /// </summary>
         public Stack<T> PathFindOneStep(T start, T end)
         {
-            if (Open == null)
+            if (m_Open == null)
             {
                 InitializeCollections(start, end);
+                Listener?.Reset();
             }
 
-            Debug.Assert(Open != null, "Collections were not initialized correctly");
+            Debug.Assert(m_Open != null, "Collections were not initialized correctly");
 
             //Take the most promising node
-            var currentNode = Open.Dequeue();
+            var currentNode = m_Open.Dequeue();
 
             if (currentNode == null || currentNode.Equals(end))
             {
                 return ConstructBestPath(start, end);
             }
 
-            Closed.Add(currentNode);
+            m_Closed.Add(currentNode);
             Listener?.SetClosed(currentNode);
 
             var neighbors = CallGetNeighbors(currentNode);
             foreach (var neighbor in neighbors)
             {
-                if (Closed.Contains(neighbor))
+                if (m_Closed.Contains(neighbor))
                     continue;
 
                 var neighborG = m_GValues[currentNode] + m_DistanceFunc(currentNode, neighbor);
                 var potentialF = neighborG + (m_DistanceFunc(neighbor, end) * HeuristicScale);
 
-                if (!Open.Contains(neighbor))
+                if (!m_Open.Contains(neighbor))
                 {
                     SetParent(neighbor, currentNode);
                     m_GValues[neighbor] = neighborG;
-                    Open.Enqueue(neighbor, potentialF);
+                    m_Open.Enqueue(neighbor, potentialF);
 
                     if (Listener == null) continue;
 
@@ -147,11 +148,11 @@ namespace AStar
                     Listener.SetGValue(neighbor, neighborG);
                     Listener.SetFValue(neighbor, potentialF);
                 }
-                else if (potentialF < Open.GetPriority(neighbor))
+                else if (potentialF < m_Open.GetPriority(neighbor))
                 {
                     SetParent(neighbor, currentNode);
                     m_GValues[neighbor] = neighborG;
-                    Open.SetPriority(neighbor, potentialF);
+                    m_Open.SetPriority(neighbor, potentialF);
 
                     if (Listener == null) continue;
 
@@ -166,14 +167,12 @@ namespace AStar
 
         private void InitializeCollections(T start, T end)
         {
-            Closed = new HashSet<T>();
-            Open = new PriorityQueue<T, double>();
-            Open.Enqueue(start, 0);
+            m_Closed = new HashSet<T>();
+            m_Open = new PriorityQueue<T, double>();
+            m_Open.Enqueue(start, 0);
 
             m_GValues = new Dictionary<T, double> { { start, 0.0 }, { end, 0.0 } };
             m_Parents = new Dictionary<T, T>();
-
-            Listener?.Reset();
         }
 
         /// <summary>

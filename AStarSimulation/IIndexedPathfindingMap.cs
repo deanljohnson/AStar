@@ -7,6 +7,12 @@ namespace AStarSimulation
     public interface IIndexedPathfindingMap : Drawable
     {
         /// <summary>
+        /// Returns whether or not this map is uniform,
+        /// ie. the cost between any neighboring cell is constant
+        /// </summary>
+        bool IsUniform { get; }
+
+        /// <summary>
         /// Return the number of cells in this map
         /// </summary>
         int Count { get; }

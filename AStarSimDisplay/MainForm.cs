@@ -12,9 +12,17 @@ namespace AStarSimDisplay
     {
         private readonly Dictionary<String, GridType> m_GridTypeMap = new Dictionary<String, GridType>
         {
-            {"Square", GridType.Square},
+            {"Square Euclidean", GridType.SquareEuclidean},
+            {"Square Manhattan", GridType.SquareManhattan},
             {"Hex", GridType.Hex}
-        }; 
+        };
+
+        private readonly Dictionary<String, AlgorithmType> m_AlgoTypeMap = new Dictionary<String, AlgorithmType>
+        {
+            {"A*", AlgorithmType.AStar},
+            {"Dijkstra", AlgorithmType.Dijkstra},
+            {"A* w/ JPS", AlgorithmType.AStarWithJPS}
+        };
 
         public Simulation Simulation { get; set; }
         public PathfindingDataDisplay DataDisplay { get; set; }
@@ -31,7 +39,7 @@ namespace AStarSimDisplay
         {
             var x = int.Parse(xNodeSizeTextBox.Text);
             var y = int.Parse(yNodeSizeTextBox.Text);
-            Simulation = new Simulation(window, GetSelectedGridType(), new Vector2i(x, y))
+            Simulation = new Simulation(window, GetSelectedAlgorithmType(), GetSelectedGridType(), new Vector2i(x, y))
             {
                 Heuristic = float.Parse(heuristicTextBox.Text)
             };
@@ -45,6 +53,11 @@ namespace AStarSimDisplay
 
         private void MainForm_Load(object sender, EventArgs e)
         {
+            foreach (var algoTypePair in m_AlgoTypeMap)
+            {
+                algorithmComboBox.Items.Add(algoTypePair.Key);
+            }
+
             foreach (var gridTypePair in m_GridTypeMap)
             {
                 gridTypeComboBox.Items.Add(gridTypePair.Key);
@@ -53,6 +66,11 @@ namespace AStarSimDisplay
             gridTypeComboBox.SelectedIndex = 0;
 
             algorithmComboBox.SelectedIndex = 0;
+        }
+
+        private void algorithmComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            SetSimAlgoTypeToSelected();
         }
 
         private void gridTypeComboBox_SelectedIndexChanged(object sender, EventArgs e)
@@ -127,6 +145,18 @@ namespace AStarSimDisplay
         {
             if (Simulation == null) return;
             Simulation.GridType = GetSelectedGridType();
+        }
+
+        private void SetSimAlgoTypeToSelected()
+        {
+            if (Simulation == null) return;
+            Simulation.AlgorithmType = GetSelectedAlgorithmType();
+        }
+
+        private AlgorithmType GetSelectedAlgorithmType()
+        {
+            var selectedString = algorithmComboBox.Items[algorithmComboBox.SelectedIndex].ToString();
+            return m_AlgoTypeMap[selectedString];
         }
 
         private GridType GetSelectedGridType()

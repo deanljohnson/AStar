@@ -11,6 +11,10 @@ namespace AStarSimulation.Grids.Square
 
         private Dictionary<CellState, Color> m_StateToColorMap { get; }
 
+        public bool IsUniform => UseManhattanMetric;
+
+        public bool UseManhattanMetric = false;
+
         public int Count => GridSize.X*GridSize.Y;
 
         public SquareGrid(Vector2i cellSize, Vector2i gridSize, Dictionary<CellState, Color> stateToColorMap)
@@ -68,6 +72,9 @@ namespace AStarSimulation.Grids.Square
 
         public double DistanceEstimate(Vector2i a, Vector2i b)
         {
+            if (UseManhattanMetric)
+                return Math.Abs(b.X - a.X) + Math.Abs(b.Y - a.Y);
+
             return Utils.Distance(new Vector2f(a.X, a.Y), new Vector2f(b.X, b.Y));
         }
 
@@ -84,19 +91,25 @@ namespace AStarSimulation.Grids.Square
             {
                 neighbors.Add(new Vector2i(current.X, current.Y - 1));
 
-                if (!onLeft)
-                    neighbors.Add(new Vector2i(current.X - 1, current.Y - 1));
-                if (!onRight)
-                    neighbors.Add(new Vector2i(current.X + 1, current.Y - 1));
+                if (!UseManhattanMetric)
+                {
+                    if (!onLeft)
+                        neighbors.Add(new Vector2i(current.X - 1, current.Y - 1));
+                    if (!onRight)
+                        neighbors.Add(new Vector2i(current.X + 1, current.Y - 1));
+                }
             }
             if (!onBottom)
             {
                 neighbors.Add(new Vector2i(current.X, current.Y + 1));
 
-                if (!onLeft)
-                    neighbors.Add(new Vector2i(current.X - 1, current.Y + 1));
-                if (!onRight)
-                    neighbors.Add(new Vector2i(current.X + 1, current.Y + 1));
+                if (!UseManhattanMetric)
+                {
+                    if (!onLeft)
+                        neighbors.Add(new Vector2i(current.X - 1, current.Y + 1));
+                    if (!onRight)
+                        neighbors.Add(new Vector2i(current.X + 1, current.Y + 1));
+                }
             }
             if (!onLeft)
                 neighbors.Add(new Vector2i(current.X - 1, current.Y));

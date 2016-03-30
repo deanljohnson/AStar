@@ -58,8 +58,10 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AlgorithmType.cs" />
     <Compile Include="AStarListener.cs" />
     <Compile Include="CellState.cs" />
+    <Compile Include="DijkstraListener.cs" />
     <Compile Include="GridType.cs" />
     <Compile Include="IWallGenerator.cs" />
     <Compile Include="PathfindingData.cs" />
@@ -72,6 +74,7 @@
     <Compile Include="SimulationAction.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Simulation.cs" />
+    <Compile Include="SolverFactory.cs" />
     <Compile Include="StraightWallGenerator.cs" />
     <Compile Include="Utils.cs" />
   </ItemGroup>

@@ -49,6 +49,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AStar.cs" />
+    <Compile Include="Dijkstra.cs" />
     <Compile Include="IAStarListener.cs" />
     <Compile Include="IPathFinder.cs" />
     <Compile Include="IPathFindingListener.cs" />

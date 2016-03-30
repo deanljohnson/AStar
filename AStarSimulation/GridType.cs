@@ -2,7 +2,8 @@
 {
     public enum GridType
     {
-        Square,
+        SquareEuclidean,
+        SquareManhattan,
         Hex
     }
 }

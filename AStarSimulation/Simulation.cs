@@ -28,6 +28,7 @@ namespace AStarSimulation
 
         private readonly RenderWindow m_Window;
 
+        private readonly SolverFactory m_SolverFactory = new SolverFactory();
         private IIndexedPathfindingMap m_Grid;
         private IPathFinder<Vector2i> m_PathFinder;
         private IPathFindingListener<Vector2i> m_PathFindingListener; 
@@ -35,6 +36,7 @@ namespace AStarSimulation
         private Vector2i m_End;
         private PathfindingGraphState m_GraphState;
         private SimulationAction m_SimulationAction;
+        private AlgorithmType m_AlgorithmType;
         private GridType m_GridType;
         private Vector2i m_NodeSize;
         private double m_Heuristic;
@@ -71,6 +73,18 @@ namespace AStarSimulation
             }
         }
 
+        public AlgorithmType AlgorithmType
+        {
+            get { return m_AlgorithmType; }
+            set
+            {
+                if (m_AlgorithmType == value) return;
+
+                m_AlgorithmType = value;
+                RebuildGraph();
+            }
+        }
+
         /// <summary>
         /// The SimulationAction to run at the next call to Update
         /// </summary>
@@ -101,7 +115,7 @@ namespace AStarSimulation
         public bool GenerateWalls { get; set; }
         public PathfindingData Data { get; set; } = new PathfindingData();
 
-        public Simulation(RenderWindow window, GridType gridType, Vector2i nodeSize)
+        public Simulation(RenderWindow window, AlgorithmType algoType, GridType gridType, Vector2i nodeSize)
         {
             m_Window = window;
             m_Window.MouseButtonPressed += MousePressedEvent;
@@ -110,6 +124,7 @@ namespace AStarSimulation
             SimulationAction = SimulationAction.None;
 
             m_NodeSize = nodeSize;
+            m_AlgorithmType = algoType;
             m_GridType = gridType;
             RebuildGraph();
         }
@@ -148,8 +163,13 @@ namespace AStarSimulation
         {
             switch (m_GridType)
             {
-                case GridType.Square:
+                case GridType.SquareEuclidean:
                     m_Grid = BuildSquareGrid(m_NodeSize);
+                    SimulationAction = SimulationAction.None;
+                    ResetGraph();
+                    break;
+                case GridType.SquareManhattan:
+                    m_Grid = BuildSquareGrid(m_NodeSize, true);
                     SimulationAction = SimulationAction.None;
                     ResetGraph();
                     break;
@@ -161,10 +181,13 @@ namespace AStarSimulation
             }
         }
 
-        private IIndexedPathfindingMap BuildSquareGrid(Vector2i nodeSize)
+        private IIndexedPathfindingMap BuildSquareGrid(Vector2i nodeSize, bool manhattanMetric = false)
         {
             var gridSize = new Vector2i((int)(m_Window.Size.X / nodeSize.X), (int)(m_Window.Size.Y / nodeSize.Y));
-            return new SquareGrid(nodeSize, gridSize, StateToColorMap);
+            return new SquareGrid(nodeSize, gridSize, StateToColorMap)
+            {
+                UseManhattanMetric = manhattanMetric
+            };
         }
 
         private IIndexedPathfindingMap BuildHexGrid(Vector2i hexSize)
@@ -299,24 +322,7 @@ namespace AStarSimulation
         /// </summary>
         private void ResetGraph()
         {
-            var aStarListener = m_PathFindingListener as IAStarListener<Vector2i>;
-            if (aStarListener != null)
-            {
-                aStarListener.Reset();
-                m_PathFinder = new AStar<Vector2i>(m_Grid.NeighborsOfCell, m_Grid.DistanceEstimate, Heuristic)
-                {
-                    Listener = aStarListener
-                };
-            }
-            else
-            {
-                m_PathFindingListener = new AStarListener();
-                m_PathFinder = new AStar<Vector2i>(m_Grid.NeighborsOfCell, m_Grid.DistanceEstimate, Heuristic)
-                {
-                    Listener = (IAStarListener<Vector2i>)m_PathFindingListener
-                };
-            }
-            
+            m_SolverFactory.CreateSolver(m_AlgorithmType, m_Grid, Heuristic, out m_PathFinder, out m_PathFindingListener);
             
             ResetNodes();
 

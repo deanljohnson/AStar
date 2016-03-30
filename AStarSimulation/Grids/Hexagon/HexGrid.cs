@@ -12,6 +12,8 @@ namespace AStarSimulation.Grids.Hexagon
         private static readonly Random Random = new Random();
         private Dictionary<CellState, Color> m_StateToColorMap { get; }
 
+        public bool IsUniform => true;
+
         public int Count => ColorTable.Count;
 
         public HexGrid(int rad, Orientation o, Vector2f cellSize, Dictionary<CellState, Color> stateToColorMap) 
