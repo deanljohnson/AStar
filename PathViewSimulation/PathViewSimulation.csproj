@@ -1,0 +1,113 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{4BBDCC5C-80DD-4EB4-822D-09D1AF5EDE3A}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>PathViewSimulation</RootNamespace>
+    <AssemblyName>PathViewSimulation</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="PriorityQueue">
+      <HintPath>libs\PriorityQueue.dll</HintPath>
+    </Reference>
+    <Reference Include="sfmlnet-audio-2">
+      <HintPath>..\..\..\extlibs\SFML\References\sfmlnet-audio-2.dll</HintPath>
+    </Reference>
+    <Reference Include="sfmlnet-graphics-2">
+      <HintPath>..\..\..\extlibs\SFML\References\sfmlnet-graphics-2.dll</HintPath>
+    </Reference>
+    <Reference Include="sfmlnet-system-2, Version=2.2.0.0, Culture=neutral, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>libs\sfmlnet-system-2.dll</HintPath>
+    </Reference>
+    <Reference Include="sfmlnet-window-2">
+      <HintPath>..\..\..\extlibs\SFML\References\sfmlnet-window-2.dll</HintPath>
+    </Reference>
+    <Reference Include="SFNetHex">
+      <HintPath>libs\SFNetHex.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AlgorithmType.cs" />
+    <Compile Include="AStarListener.cs" />
+    <Compile Include="CellState.cs" />
+    <Compile Include="DijkstraListener.cs" />
+    <Compile Include="GridType.cs" />
+    <Compile Include="IWallGenerator.cs" />
+    <Compile Include="PathfindingData.cs" />
+    <Compile Include="Grids\Hexagon\DrawableHexSet.cs" />
+    <Compile Include="Grids\Hexagon\HexGrid.cs" />
+    <Compile Include="IIndexedPathfindingMap.cs" />
+    <Compile Include="Grids\Square\SquareGridBase.cs" />
+    <Compile Include="Grids\Square\SquareGrid.cs" />
+    <Compile Include="PathfindingGraphState.cs" />
+    <Compile Include="SimulationAction.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Simulation.cs" />
+    <Compile Include="SolverFactory.cs" />
+    <Compile Include="StraightWallGenerator.cs" />
+    <Compile Include="Utils.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\PathView\PathView.csproj">
+      <Project>{9656a4e8-8ac8-469b-8fb3-f032da57d23f}</Project>
+      <Name>PathView</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="libs\csfml-graphics-2.dll" />
+    <Content Include="libs\csfml-network-2.dll" />
+    <Content Include="libs\csfml-system-2.dll" />
+    <Content Include="libs\csfml-window-2.dll" />
+    <Content Include="libs\libsndfile-1.dll" />
+    <Content Include="libs\sfmlnet-graphics-2.dll" />
+    <Content Include="libs\sfmlnet-system-2.dll" />
+    <Content Include="libs\sfmlnet-window-2.dll" />
+    <Content Include="libs\SFNetHex.dll" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>copy "$(ProjectDir)\libs\*.*" "$(TargetDir)"</PostBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
