@@ -174,46 +174,10 @@ namespace PathViewSimulation
         /// </summary>
         private void RebuildGraph()
         {
-            switch (m_GridType)
-            {
-                case GridType.SquareEuclidean:
-                    m_Grid = BuildSquareGrid(m_NodeSize);
-                    SimulationAction = SimulationAction.None;
-                    ResetGraph();
-                    break;
-                case GridType.SquareManhattan:
-                    m_Grid = BuildSquareGrid(m_NodeSize, true);
-                    SimulationAction = SimulationAction.None;
-                    ResetGraph();
-                    break;
-                case GridType.Hex:
-                    m_Grid = BuildHexGrid(m_NodeSize);
-                    SimulationAction = SimulationAction.None;
-                    ResetGraph();
-                    break;
-            }
-        }
+            m_Grid = IndexedPathfindingMapFactory.BuildMap(m_GridType, m_NodeSize, m_Window.Size, StateToColorMap);
 
-        private IIndexedPathfindingMap BuildSquareGrid(Vector2i nodeSize, bool manhattanMetric = false)
-        {
-            var gridSize = new Vector2i((int)(m_Window.Size.X / nodeSize.X), (int)(m_Window.Size.Y / nodeSize.Y));
-            return new SquareGrid(nodeSize, gridSize, StateToColorMap)
-            {
-                UseManhattanMetric = manhattanMetric
-            };
-        }
-
-        private IIndexedPathfindingMap BuildHexGrid(Vector2i hexSize)
-        {
-            var floatHexSize = new Vector2f(hexSize.X, hexSize.Y);
-            var testHex = new HexShape(new Layout(Orientation.Flat, floatHexSize, new Vector2f(0, 0)));
-            var size = new Vector2f(testHex.GetLocalBounds().Width, testHex.GetLocalBounds().Height);
-            //We subtract one to handle the center hex
-            var vertRadius = m_Window.Size.Y / (2f * size.Y) - 1;
-            var horizRadius = m_Window.Size.X / (2f * size.X) - 1;
-
-            return new HexGrid((int)Math.Min(vertRadius, horizRadius), Orientation.Flat, floatHexSize, StateToColorMap)
-            { Position = new Vector2f(m_Window.Size.X / 2f, m_Window.Size.Y / 2f) };
+            SimulationAction = SimulationAction.None;
+            ResetGraph();
         }
 
         /// <summary>

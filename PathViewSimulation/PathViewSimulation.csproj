@@ -63,6 +63,7 @@
     <Compile Include="CellState.cs" />
     <Compile Include="DijkstraListener.cs" />
     <Compile Include="GridType.cs" />
+    <Compile Include="IndexedPathfindingMapFactory.cs" />
     <Compile Include="IWallGenerator.cs" />
     <Compile Include="PathfindingData.cs" />
     <Compile Include="Grids\Hexagon\DrawableHexSet.cs" />
