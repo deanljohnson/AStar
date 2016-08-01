@@ -38,9 +38,6 @@
     <Reference Include="PriorityQueue">
       <HintPath>libs\PriorityQueue.dll</HintPath>
     </Reference>
-    <Reference Include="sfmlnet-audio-2">
-      <HintPath>..\..\..\extlibs\SFML\References\sfmlnet-audio-2.dll</HintPath>
-    </Reference>
     <Reference Include="sfmlnet-graphics-2">
       <HintPath>..\..\..\extlibs\SFML\References\sfmlnet-graphics-2.dll</HintPath>
     </Reference>
