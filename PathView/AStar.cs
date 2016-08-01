@@ -73,7 +73,7 @@ namespace PathView
 
                     if (!m_Open.Contains(neighbor))
                     {
-                        SetParent(neighbor, currentNode);
+                        m_Parents[neighbor] = currentNode;
                         m_GValues[neighbor] = neighborG;
                         m_Open.Enqueue(neighbor, potentialF);
 
@@ -86,7 +86,7 @@ namespace PathView
                     }
                     else if (potentialF < m_Open.GetPriority(neighbor))
                     {
-                        SetParent(neighbor, currentNode);
+                        m_Parents[neighbor] = currentNode;
                         m_GValues[neighbor] = neighborG;
                         m_Open.SetPriority(neighbor, potentialF);
 
@@ -115,6 +115,8 @@ namespace PathView
 
             Debug.Assert(m_Open != null, "Collections were not initialized correctly");
 
+            if (!m_Open.Any())
+                return null;
             //Take the most promising node
             var currentNode = m_Open.Dequeue();
 
@@ -137,7 +139,7 @@ namespace PathView
 
                 if (!m_Open.Contains(neighbor))
                 {
-                    SetParent(neighbor, currentNode);
+                    m_Parents[neighbor] = currentNode;
                     m_GValues[neighbor] = neighborG;
                     m_Open.Enqueue(neighbor, potentialF);
 
@@ -150,7 +152,7 @@ namespace PathView
                 }
                 else if (potentialF < m_Open.GetPriority(neighbor))
                 {
-                    SetParent(neighbor, currentNode);
+                    m_Parents[neighbor] = currentNode;
                     m_GValues[neighbor] = neighborG;
                     m_Open.SetPriority(neighbor, potentialF);
 
@@ -173,21 +175,6 @@ namespace PathView
 
             m_GValues = new Dictionary<T, double> { { start, 0.0 }, { end, 0.0 } };
             m_Parents = new Dictionary<T, T>();
-        }
-
-        /// <summary>
-        ///     Sets the parent of the given node. If the node already has a parent assigned, the previous parent is overwritten
-        /// </summary>
-        private void SetParent(T node, T parent)
-        {
-            if (m_Parents.ContainsKey(node))
-            {
-                m_Parents[node] = parent;
-            }
-            else
-            {
-                m_Parents.Add(node, parent);
-            }
         }
 
         /// <summary>

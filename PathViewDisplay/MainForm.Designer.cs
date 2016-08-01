@@ -47,15 +47,18 @@ namespace PathViewDisplay
             this.algorithmLabel = new System.Windows.Forms.Label();
             this.algorithmComboBox = new System.Windows.Forms.ComboBox();
             this.generateWallsCheckbox = new System.Windows.Forms.CheckBox();
-            this.dataDisplay = new PathfindingDataDisplay();
-            this.SFMLDrawingSurface = new SFMLDrawingSurface();
+            this.runProgressiveButton = new System.Windows.Forms.Button();
+            this.movesPerSecondTextBox = new System.Windows.Forms.TextBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.dataDisplay = new PathViewDisplay.PathfindingDataDisplay();
+            this.SFMLDrawingSurface = new PathViewDisplay.SFMLDrawingSurface();
             this.SuspendLayout();
             // 
             // gridTypeComboBox
             // 
             this.gridTypeComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.gridTypeComboBox.FormattingEnabled = true;
-            this.gridTypeComboBox.Location = new System.Drawing.Point(30, 163);
+            this.gridTypeComboBox.Location = new System.Drawing.Point(30, 224);
             this.gridTypeComboBox.Name = "gridTypeComboBox";
             this.gridTypeComboBox.Size = new System.Drawing.Size(105, 21);
             this.gridTypeComboBox.TabIndex = 1;
@@ -64,7 +67,7 @@ namespace PathViewDisplay
             // gridTypeLabel
             // 
             this.gridTypeLabel.AutoSize = true;
-            this.gridTypeLabel.Location = new System.Drawing.Point(21, 147);
+            this.gridTypeLabel.Location = new System.Drawing.Point(21, 208);
             this.gridTypeLabel.Name = "gridTypeLabel";
             this.gridTypeLabel.Size = new System.Drawing.Size(53, 13);
             this.gridTypeLabel.TabIndex = 2;
@@ -103,7 +106,7 @@ namespace PathViewDisplay
             // nodeSizeLabel
             // 
             this.nodeSizeLabel.AutoSize = true;
-            this.nodeSizeLabel.Location = new System.Drawing.Point(21, 187);
+            this.nodeSizeLabel.Location = new System.Drawing.Point(21, 248);
             this.nodeSizeLabel.Name = "nodeSizeLabel";
             this.nodeSizeLabel.Size = new System.Drawing.Size(56, 13);
             this.nodeSizeLabel.TabIndex = 6;
@@ -111,7 +114,7 @@ namespace PathViewDisplay
             // 
             // xNodeSizeTextBox
             // 
-            this.xNodeSizeTextBox.Location = new System.Drawing.Point(53, 203);
+            this.xNodeSizeTextBox.Location = new System.Drawing.Point(53, 264);
             this.xNodeSizeTextBox.Name = "xNodeSizeTextBox";
             this.xNodeSizeTextBox.Size = new System.Drawing.Size(82, 20);
             this.xNodeSizeTextBox.TabIndex = 7;
@@ -119,7 +122,7 @@ namespace PathViewDisplay
             // 
             // yNodeSizeTextBox
             // 
-            this.yNodeSizeTextBox.Location = new System.Drawing.Point(53, 229);
+            this.yNodeSizeTextBox.Location = new System.Drawing.Point(53, 290);
             this.yNodeSizeTextBox.Name = "yNodeSizeTextBox";
             this.yNodeSizeTextBox.Size = new System.Drawing.Size(82, 20);
             this.yNodeSizeTextBox.TabIndex = 8;
@@ -128,7 +131,7 @@ namespace PathViewDisplay
             // xNodeSizeLabel
             // 
             this.xNodeSizeLabel.AutoSize = true;
-            this.xNodeSizeLabel.Location = new System.Drawing.Point(33, 206);
+            this.xNodeSizeLabel.Location = new System.Drawing.Point(33, 267);
             this.xNodeSizeLabel.Name = "xNodeSizeLabel";
             this.xNodeSizeLabel.Size = new System.Drawing.Size(14, 13);
             this.xNodeSizeLabel.TabIndex = 9;
@@ -137,7 +140,7 @@ namespace PathViewDisplay
             // yNodeSizeLabel
             // 
             this.yNodeSizeLabel.AutoSize = true;
-            this.yNodeSizeLabel.Location = new System.Drawing.Point(33, 232);
+            this.yNodeSizeLabel.Location = new System.Drawing.Point(33, 293);
             this.yNodeSizeLabel.Name = "yNodeSizeLabel";
             this.yNodeSizeLabel.Size = new System.Drawing.Size(14, 13);
             this.yNodeSizeLabel.TabIndex = 10;
@@ -146,7 +149,7 @@ namespace PathViewDisplay
             // heuristicLabel
             // 
             this.heuristicLabel.AutoSize = true;
-            this.heuristicLabel.Location = new System.Drawing.Point(21, 252);
+            this.heuristicLabel.Location = new System.Drawing.Point(21, 313);
             this.heuristicLabel.Name = "heuristicLabel";
             this.heuristicLabel.Size = new System.Drawing.Size(48, 13);
             this.heuristicLabel.TabIndex = 11;
@@ -154,7 +157,7 @@ namespace PathViewDisplay
             // 
             // heuristicTextBox
             // 
-            this.heuristicTextBox.Location = new System.Drawing.Point(30, 268);
+            this.heuristicTextBox.Location = new System.Drawing.Point(30, 329);
             this.heuristicTextBox.Name = "heuristicTextBox";
             this.heuristicTextBox.Size = new System.Drawing.Size(105, 20);
             this.heuristicTextBox.TabIndex = 12;
@@ -163,7 +166,7 @@ namespace PathViewDisplay
             // saveEndPointsCheckBox
             // 
             this.saveEndPointsCheckBox.AutoSize = true;
-            this.saveEndPointsCheckBox.Location = new System.Drawing.Point(24, 294);
+            this.saveEndPointsCheckBox.Location = new System.Drawing.Point(24, 355);
             this.saveEndPointsCheckBox.Name = "saveEndPointsCheckBox";
             this.saveEndPointsCheckBox.Size = new System.Drawing.Size(105, 17);
             this.saveEndPointsCheckBox.TabIndex = 13;
@@ -174,7 +177,7 @@ namespace PathViewDisplay
             // algorithmLabel
             // 
             this.algorithmLabel.AutoSize = true;
-            this.algorithmLabel.Location = new System.Drawing.Point(21, 107);
+            this.algorithmLabel.Location = new System.Drawing.Point(21, 168);
             this.algorithmLabel.Name = "algorithmLabel";
             this.algorithmLabel.Size = new System.Drawing.Size(50, 13);
             this.algorithmLabel.TabIndex = 15;
@@ -184,7 +187,7 @@ namespace PathViewDisplay
             // 
             this.algorithmComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.algorithmComboBox.FormattingEnabled = true;
-            this.algorithmComboBox.Location = new System.Drawing.Point(30, 123);
+            this.algorithmComboBox.Location = new System.Drawing.Point(30, 184);
             this.algorithmComboBox.Name = "algorithmComboBox";
             this.algorithmComboBox.Size = new System.Drawing.Size(105, 21);
             this.algorithmComboBox.TabIndex = 16;
@@ -193,13 +196,40 @@ namespace PathViewDisplay
             // generateWallsCheckbox
             // 
             this.generateWallsCheckbox.AutoSize = true;
-            this.generateWallsCheckbox.Location = new System.Drawing.Point(24, 317);
+            this.generateWallsCheckbox.Location = new System.Drawing.Point(24, 378);
             this.generateWallsCheckbox.Name = "generateWallsCheckbox";
             this.generateWallsCheckbox.Size = new System.Drawing.Size(99, 17);
             this.generateWallsCheckbox.TabIndex = 17;
             this.generateWallsCheckbox.Text = "Generate Walls";
             this.generateWallsCheckbox.UseVisualStyleBackColor = true;
             this.generateWallsCheckbox.CheckedChanged += new System.EventHandler(this.generateWallsCheckbox_CheckedChanged);
+            // 
+            // runProgressiveButton
+            // 
+            this.runProgressiveButton.Location = new System.Drawing.Point(24, 99);
+            this.runProgressiveButton.Name = "runProgressiveButton";
+            this.runProgressiveButton.Size = new System.Drawing.Size(111, 23);
+            this.runProgressiveButton.TabIndex = 18;
+            this.runProgressiveButton.Text = "Run Progressive";
+            this.runProgressiveButton.UseVisualStyleBackColor = true;
+            this.runProgressiveButton.Click += new System.EventHandler(this.runProgressiveButton_Click);
+            // 
+            // movesPerSecondTextBox
+            // 
+            this.movesPerSecondTextBox.Location = new System.Drawing.Point(53, 145);
+            this.movesPerSecondTextBox.Name = "movesPerSecondTextBox";
+            this.movesPerSecondTextBox.Size = new System.Drawing.Size(82, 20);
+            this.movesPerSecondTextBox.TabIndex = 19;
+            this.movesPerSecondTextBox.Text = "1";
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(50, 129);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(82, 13);
+            this.label1.TabIndex = 20;
+            this.label1.Text = "Moves per Sec.";
             // 
             // dataDisplay
             // 
@@ -220,6 +250,9 @@ namespace PathViewDisplay
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1584, 850);
+            this.Controls.Add(this.label1);
+            this.Controls.Add(this.movesPerSecondTextBox);
+            this.Controls.Add(this.runProgressiveButton);
             this.Controls.Add(this.generateWallsCheckbox);
             this.Controls.Add(this.algorithmComboBox);
             this.Controls.Add(this.algorithmLabel);
@@ -267,6 +300,9 @@ namespace PathViewDisplay
         private System.Windows.Forms.Label algorithmLabel;
         private System.Windows.Forms.ComboBox algorithmComboBox;
         private System.Windows.Forms.CheckBox generateWallsCheckbox;
+        private System.Windows.Forms.Button runProgressiveButton;
+        private System.Windows.Forms.TextBox movesPerSecondTextBox;
+        private System.Windows.Forms.Label label1;
     }
 }
 

@@ -5,6 +5,7 @@
         None,
         RunContinuously,
         RunOnce,
-        RunOneStep
+        RunOneStep,
+        RunProgressive
     }
 }

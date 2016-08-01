@@ -33,6 +33,7 @@ namespace PathViewDisplay
             xNodeSizeTextBox.Validating += XNodeSizeTextBoxOnValidating;
             yNodeSizeTextBox.Validating += YNodeSizeTextBoxOnValidating;
             heuristicTextBox.Validating += HeuristicTextBoxOnValidating;
+            movesPerSecondTextBox.Validating += MovesPerSecondTextBoxValidating;
         }
 
         public void InitializeSim(RenderWindow window)
@@ -101,6 +102,12 @@ namespace PathViewDisplay
             Simulation.SimulationAction = SimulationAction.RunOneStep;
         }
 
+        private void runProgressiveButton_Click(object sender, EventArgs e)
+        {
+            Simulation.SimulationAction = SimulationAction.RunProgressive;
+            Simulation.MovesPerSecond = int.Parse(movesPerSecondTextBox.Text);
+        }
+
         private void YNodeSizeTextBoxOnValidating(object sender, CancelEventArgs cancelEventArgs)
         {
             int y;
@@ -139,6 +146,18 @@ namespace PathViewDisplay
             }
 
             Simulation.Heuristic = h;
+        }
+
+        private void MovesPerSecondTextBoxValidating(object sender, CancelEventArgs cancelEventArgs)
+        {
+            int m;
+            if (!int.TryParse(movesPerSecondTextBox.Text, out m) || m == 0)
+            {
+                cancelEventArgs.Cancel = true;
+                return;
+            }
+
+            Simulation.MovesPerSecond = m;
         }
 
         private void SetSimGridTypeToSelected()

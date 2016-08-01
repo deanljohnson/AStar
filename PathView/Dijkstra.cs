@@ -48,8 +48,11 @@ namespace PathView
                 m_Closed.Add(current);
                 Listener?.SetClosed(current);
 
-                foreach (var neighbor in m_NeighborsFunc(current).Where(n => !m_Closed.Contains(n)))
+                foreach (var neighbor in m_NeighborsFunc(current))
                 {
+                    if (m_Closed.Contains(neighbor))
+                        continue;
+
                     var d = m_Distances[current] + m_DistanceFunc(current, neighbor);
 
                     if (!m_Open.Contains(neighbor))
@@ -92,8 +95,6 @@ namespace PathView
                 InitializeCollections(start, end);
                 Listener?.Reset();
             }
-
-            Debug.Assert(m_Open != null, "Collections were not initialized correctly");
 
             var current = m_Open.Dequeue();
 

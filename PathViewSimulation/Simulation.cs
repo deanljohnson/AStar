@@ -40,6 +40,7 @@ namespace PathViewSimulation
         private GridType m_GridType;
         private Vector2i m_NodeSize;
         private double m_Heuristic;
+        private Stopwatch m_Timer;
 
         /// <summary>
         /// The size of the nodes currently in use by the Simulation
@@ -111,6 +112,7 @@ namespace PathViewSimulation
             }
         }
 
+        public int MovesPerSecond { get; set; }
         public bool SaveEndPoints { get; set; }
         public bool GenerateWalls { get; set; }
         public PathfindingData Data { get; set; } = new PathfindingData();
@@ -147,6 +149,17 @@ namespace PathViewSimulation
                 case SimulationAction.RunOneStep:
                     RunOneStep();
                     SimulationAction = SimulationAction.None;
+                    break;
+                case SimulationAction.RunProgressive:
+                    if (m_GraphState == PathfindingGraphState.Finished)
+                        SimulationAction = SimulationAction.None;
+                    else if (m_Timer.ElapsedMilliseconds > (1000f/MovesPerSecond))
+                    {
+                        m_Timer.Restart();
+                        RunOneStep();
+                        if (m_GraphState == PathfindingGraphState.Finished)
+                            SimulationAction = SimulationAction.None;
+                    }
                     break;
             }
         }
@@ -234,6 +247,19 @@ namespace PathViewSimulation
                     {
                         m_SimulationAction = newAction;
                     }
+                    break;
+                case SimulationAction.RunProgressive:
+                    if (m_GraphState == PathfindingGraphState.Finished)
+                    {
+                        ResetGraph();
+                    }
+                    else
+                    {
+                        m_SimulationAction = newAction;
+                        m_Timer = new Stopwatch();
+                        m_Timer.Start();
+                    }
+                    
                     break;
             }
         }
